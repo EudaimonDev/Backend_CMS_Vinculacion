@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="CMSVinculacion.Api/CMSVinculacion.Api.csproj" />
+  <Project Path="CMSVinculacion.Application/CMSVinculacion.Application.csproj" />
+  <Project Path="CMSVinculacion.Domain/CMSVinculacion.Domain.csproj" />
+  <Project Path="CMSVinculacion.Infrastructure/CMSVinculacion.Infrastructure.csproj" />
+</Solution>
