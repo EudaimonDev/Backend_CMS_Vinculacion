@@ -205,7 +205,7 @@ namespace CMSVinculacion.Api.Extensions
             app.UseSwagger();
             app.UseSwaggerUI(c =>
             {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Nómina.API v1");
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "VinculaciónUG.API v1");
             });
 
             app.UseCors("origen1");
