@@ -1,23 +1,30 @@
+using CMSVinculacion.Api.Extensions;
+using Microsoft.AspNetCore.Http.Features;
+
 var builder = WebApplication.CreateBuilder(args);
+
+var startup = new Startup(builder.Configuration);
+startup.ConfigureServices(builder.Services);
 
 // Add services to the container.
 
-builder.Services.AddControllers();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
-
+// Aumentar límite de tamaño del request (por defecto 30MB)
+builder.Services.Configure<FormOptions>(options =>
+{
+    options.MultipartBodyLengthLimit = 100 * 1024 * 1024; // 100 MB
+});
+// También puedes aumentar el límite en Kestrel
+builder.WebHost.ConfigureKestrel(serverOptions =>
+{
+    serverOptions.Limits.MaxRequestBodySize = 100 * 1024 * 1024; // 100 MB
+});
+builder.Services.AddDataProtection();
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-}
+var servicioLogger = (ILogger<Startup>)app.Services.GetService(typeof(ILogger<Startup>));
 
-app.UseHttpsRedirection();
+startup.Configure(app, app.Environment, servicioLogger);
+app.UseStaticFiles();
+app.UseWebSockets();
 
-app.UseAuthorization();
-
-app.MapControllers();
-
-app.Run();
+await app.RunAsync();
