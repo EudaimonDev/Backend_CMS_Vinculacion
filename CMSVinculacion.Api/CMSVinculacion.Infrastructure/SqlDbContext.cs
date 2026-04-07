@@ -7,6 +7,8 @@ namespace CMSVinculacion.Infrastructure
          DbContextOptions<SqlDbContext> options) : DbContext(options)
     {
         public DbSet<Persona> Personas => Set<Persona>();
+        public DbSet<VisitanteAcceso> VisitantesAcceso { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
 
