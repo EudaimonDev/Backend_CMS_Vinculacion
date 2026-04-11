@@ -1,7 +1,7 @@
 using CMSVinculacion.Api.Extensions;
 using CMSVinculacion.Application.Interfaces;
 using CMSVinculacion.Application.Services;
-using CMSVinculacion.Infrastructure.Repositories;
+/*using CMSVinculacion.Infrastructure.Repositories;*/
 using Microsoft.AspNetCore.Http.Features;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,8 +10,8 @@ var startup = new Startup(builder.Configuration);
 startup.ConfigureServices(builder.Services);
 
 // Add services to the container.
-builder.Services.AddScoped<IGatekeeperRepository, GatekeeperRepository>();
-builder.Services.AddScoped<IGatekeeperService, GatekeeperService>();
+/*builder.Services.AddScoped<IGatekeeperRepository, GatekeeperRepository>();
+builder.Services.AddScoped<IGatekeeperService, GatekeeperService>();*/
 // Aumentar límite de tamaño del request (por defecto 30MB)
 builder.Services.Configure<FormOptions>(options =>
 {

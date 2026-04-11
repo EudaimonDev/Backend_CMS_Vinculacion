@@ -1,4 +1,4 @@
-﻿using CMSVinculacion.Application.Interfaces;
+﻿/*using CMSVinculacion.Application.Interfaces;
 using CMSVinculacion.Domain.Entities.Catalogos;
 using System;
 using System.Collections.Generic;
@@ -31,3 +31,4 @@ namespace CMSVinculacion.Infrastructure.Repositories
         }
     }
 }
+*/
