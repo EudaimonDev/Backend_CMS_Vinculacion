@@ -14,3 +14,5 @@ namespace CMSVinculacion.Domain.Entities.Catalogos
     }
 }
 */
+
+//No usar esta clase, es una guia para el gatekeeper
