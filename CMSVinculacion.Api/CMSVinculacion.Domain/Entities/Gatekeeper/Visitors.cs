@@ -20,7 +20,7 @@ namespace CMSVinculacion.Domain.Entities.Gatekeeper
         public string? Email { get; set; } = string.Empty;
         [MaxLength (300)]
         public string? Institution { get; set; } = string.Empty;
-        public DateTime RegisteredAt { get; set; } = DateTime.UtcNow;
+
         [MaxLength(512)]
         public string? CookieToken { get; set; } = string.Empty;
         [MaxLength(50)]

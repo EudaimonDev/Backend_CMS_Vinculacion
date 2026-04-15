@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CMSVinculacion.Infrastructure.Migrations
 {
     [DbContext(typeof(SqlDbContext))]
-    [Migration("20260410235821_MigracionInicial")]
+    [Migration("20260414044014_MigracionInicial")]
     partial class MigracionInicial
     {
         /// <inheritdoc />
@@ -324,9 +324,6 @@ namespace CMSVinculacion.Infrastructure.Migrations
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
-
-                    b.Property<DateTime>("RegisteredAt")
-                        .HasColumnType("datetime2");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");

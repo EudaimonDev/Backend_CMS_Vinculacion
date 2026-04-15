@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 
 namespace CMSVinculacion.Domain.Entities.Catalogos
 {
+
+    //No usar esta clase, es una guia para el gatekeeper
     public class VisitanteAcceso
     {
         public long IdVisitanteAcceso { get; set; }

@@ -88,7 +88,6 @@ namespace CMSVinculacion.Infrastructure.Migrations
                     FullName = table.Column<string>(type: "varchar(200)", maxLength: 200, nullable: false),
                     Email = table.Column<string>(type: "varchar(200)", maxLength: 200, nullable: true),
                     Institution = table.Column<string>(type: "varchar(300)", maxLength: 300, nullable: true),
-                    RegisteredAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CookieToken = table.Column<string>(type: "varchar(512)", maxLength: 512, nullable: true),
                     IPAddress = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: true),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
