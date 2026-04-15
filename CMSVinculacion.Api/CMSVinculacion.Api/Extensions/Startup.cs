@@ -199,7 +199,7 @@ namespace CMSVinculacion.Api.Extensions
             {
                 app.UseDeveloperExceptionPage();
             }
-            app.UseMiddleware<LoguearRespuestaHTTPMiddleware>();
+            //app.UseMiddleware<LoguearRespuestaHTTPMiddleware>();
             app.UseLoguearRespuestaHTTP();
 
             app.UseSwagger();

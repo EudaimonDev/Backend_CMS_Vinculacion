@@ -1,10 +1,5 @@
-﻿/*using CMSVinculacion.Application.Interfaces;
-using CMSVinculacion.Domain.Entities.Catalogos;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using CMSVinculacion.Application.Interfaces;
+using CMSVinculacion.Domain.Entities.Gatekeeper;
 using Microsoft.EntityFrameworkCore;
 
 namespace CMSVinculacion.Infrastructure.Repositories
@@ -13,22 +8,18 @@ namespace CMSVinculacion.Infrastructure.Repositories
     {
         private readonly SqlDbContext _context;
 
-        public GatekeeperRepository(SqlDbContext context)
-        {
-            _context = context;
-        }
+        public GatekeeperRepository(SqlDbContext context) => _context = context;
 
-        public async Task GuardarVisitanteAsync(VisitanteAcceso visitante)
+        public async Task GuardarVisitanteAsync(Visitors visitante)
         {
-            await _context.VisitantesAcceso.AddAsync(visitante);
+            await _context.Visitors.AddAsync(visitante);
             await _context.SaveChangesAsync();
         }
 
-        public async Task<VisitanteAcceso?> ObtenerPorTokenAsync(string token)
+        public async Task<Visitors?> ObtenerPorTokenAsync(string token)
         {
-            return await _context.VisitantesAcceso
-                .FirstOrDefaultAsync(v => v.Token == token && v.Active);
+            return await _context.Visitors
+                .FirstOrDefaultAsync(v => v.CookieToken == token && v.IsActive);
         }
     }
 }
-*/

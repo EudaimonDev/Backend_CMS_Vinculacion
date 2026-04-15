@@ -1,19 +1,14 @@
 ﻿using CMSVinculacion.Application.DTOs.gatekeeper;
 using CMSVinculacion.Application.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using CMSVinculacion.Domain.Entities.Gatekeeper;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
-using CMSVinculacion.Domain.Entities.Catalogos;
 
 namespace CMSVinculacion.Application.Services
 {
     public class GatekeeperService : IGatekeeperService
     {
         private readonly IGatekeeperRepository _repo;
-        private const int HorasExpiracion = 24;
 
         public GatekeeperService(IGatekeeperRepository repo)
         {
@@ -23,12 +18,10 @@ namespace CMSVinculacion.Application.Services
         public async Task<GatekeeperResponseDto> RegistrarVisitanteAsync(
             GatekeeperRequestDto request, string ipAddress)
         {
-            // Sanitizar entradas
             var nombre = SanitizarTexto(request.Nombre);
             var email = SanitizarTexto(request.Email).ToLower();
             var institucion = SanitizarTexto(request.Institucion);
 
-            // Validaciones básicas
             if (string.IsNullOrWhiteSpace(nombre) ||
                 string.IsNullOrWhiteSpace(email) ||
                 string.IsNullOrWhiteSpace(institucion))
@@ -50,18 +43,16 @@ namespace CMSVinculacion.Application.Services
             }
 
             var token = GenerarToken(email, ipAddress);
-            var expiracion = DateTime.UtcNow.AddHours(HorasExpiracion);
 
-            var visitante = new VisitanteAcceso
+            var visitante = new Visitors
             {
-                Nombre = nombre,
+                FullName = nombre,
                 Email = email,
-                Institucion = institucion,
-                IpAddress = ipAddress,
-                Token = token,
-                FechaRegistro = DateTime.UtcNow,
-                FechaExpiracion = expiracion,
-                Active = true
+                Institution = institucion,
+                IPAddress = ipAddress,
+                CookieToken = token,
+                CreatedAt = DateTime.UtcNow,
+                IsActive = true
             };
 
             await _repo.GuardarVisitanteAsync(visitante);
@@ -70,8 +61,7 @@ namespace CMSVinculacion.Application.Services
             {
                 Exito = true,
                 Mensaje = "Registro exitoso. Bienvenido.",
-                Token = token,
-                Expiracion = expiracion
+                Token = token
             };
         }
 
@@ -79,26 +69,18 @@ namespace CMSVinculacion.Application.Services
         {
             var visitante = await _repo.ObtenerPorTokenAsync(token);
 
-            if (visitante is null || !visitante.Active)
+            if (visitante is null || !visitante.IsActive)
                 return new GatekeeperResponseDto
                 {
                     Exito = false,
-                    Mensaje = "Token inválido o expirado."
-                };
-
-            if (visitante.FechaExpiracion < DateTime.UtcNow)
-                return new GatekeeperResponseDto
-                {
-                    Exito = false,
-                    Mensaje = "El token ha expirado. Por favor regístrese nuevamente."
+                    Mensaje = "Token inválido o visitante inactivo."
                 };
 
             return new GatekeeperResponseDto
             {
                 Exito = true,
                 Mensaje = "Token válido.",
-                Token = token,
-                Expiracion = visitante.FechaExpiracion
+                Token = token
             };
         }
 
