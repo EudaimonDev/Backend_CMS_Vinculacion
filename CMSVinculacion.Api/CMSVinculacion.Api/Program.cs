@@ -21,9 +21,10 @@ builder.WebHost.ConfigureKestrel(serverOptions =>
 });
 
 builder.Services.AddDataProtection();
+Console.WriteLine(BCrypt.Net.BCrypt.HashPassword("1234"));
 
 var app = builder.Build();
-
+app.MapGet("/hash", () => BCrypt.Net.BCrypt.HashPassword("1234"));
 var servicioLogger = (ILogger<Startup>)app.Services.GetService(typeof(ILogger<Startup>))!;
 startup.Configure(app, app.Environment, servicioLogger);
 

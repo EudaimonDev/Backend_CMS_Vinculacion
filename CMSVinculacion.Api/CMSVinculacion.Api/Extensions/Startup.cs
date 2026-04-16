@@ -98,7 +98,7 @@ namespace CMSVinculacion.Api.Extensions
                          ValidateAudience = false,
                          ValidateLifetime = true,
                          ValidateIssuerSigningKey = true,
-                         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["llavejwt"])),
+                         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["Jwt:Key"])),
                          ClockSkew = TimeSpan.Zero
                      };
                      opciones.Events = new JwtBearerEvents

@@ -45,5 +45,19 @@ namespace CMSVinculacion.Api.Controllers
 
             return Ok(resultado);
         }
+
+        [HttpGet("check")]
+        public async Task<IActionResult> Check([FromQuery] string token)
+        {
+            if (string.IsNullOrWhiteSpace(token))
+                return Ok(new { registered = false });
+
+            var visitante = await _service.ValidarTokenAsync(token);
+
+            return Ok(new
+            {
+                registered = visitante.Exito
+            });
+        }
     }
 }

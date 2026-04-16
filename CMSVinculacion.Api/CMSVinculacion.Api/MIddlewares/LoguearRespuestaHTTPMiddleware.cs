@@ -26,7 +26,7 @@ namespace CMSVinculacion.Api.MIddlewares
             using (var ms = new MemoryStream())
             {
                 string token = contexto.Request.Headers["Authorization"];
-                if (token != null && !token.Contains("Basic"))
+               if (token != null && !token.Contains("Basic"))
                 {
                     string desencriptar = Desencriptar(token);
                     contexto.Items["DecryptedToken"] = desencriptar;
