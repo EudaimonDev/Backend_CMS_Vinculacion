@@ -25,26 +25,6 @@ namespace CMSVinculacion.Api.MIddlewares
         {
             using (var ms = new MemoryStream())
             {
-                //string token = contexto.Request.Headers["Authorization"];
-                //if (token != null && !token.Contains("Basic"))
-                //{
-                //    string desencriptar = Desencriptar(token);
-                //    contexto.Items["DecryptedToken"] = desencriptar;
-                //    string resultado = contexto.Items["DecryptedToken"] as string;
-                //}
-                //var cuerpoOriginalRespuesta = contexto.Response.Body;
-                //contexto.Response.Body = ms;
-
-                //// aqui se envia 
-                //await siguiente(contexto);
-
-                //ms.Seek(0, SeekOrigin.Begin);
-                //string respuesta = new StreamReader(ms).ReadToEnd();
-                //ms.Seek(0, SeekOrigin.Begin);
-
-                //await ms.CopyToAsync(cuerpoOriginalRespuesta);
-                //contexto.Response.Body = cuerpoOriginalRespuesta;
-
                 string authorizationHeader = contexto.Request.Headers["Authorization"];
 
                 // 1. Verificamos que el header exista y sea un esquema que queremos procesar
@@ -60,7 +40,9 @@ namespace CMSVinculacion.Api.MIddlewares
                     }
                     catch (Exception ex)
                     {
-                        
+                        // Loguea el error pero permite que la petición siga, 
+                        // o maneja el error de seguridad según tu lógica.
+                        // _logger.LogWarning("No se pudo desencriptar el token: {Message}", ex.Message);
                     }
                 }
 
@@ -75,7 +57,9 @@ namespace CMSVinculacion.Api.MIddlewares
 
                 await ms.CopyToAsync(cuerpoOriginalRespuesta);
                 contexto.Response.Body = cuerpoOriginalRespuesta;
-            
+
+
+
             }
         }
         private string Desencriptar(string tokenEncriptado)
