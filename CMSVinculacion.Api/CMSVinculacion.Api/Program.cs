@@ -21,7 +21,6 @@ builder.WebHost.ConfigureKestrel(serverOptions =>
 });
 
 builder.Services.AddDataProtection();
-Console.WriteLine(BCrypt.Net.BCrypt.HashPassword("1234"));
 
 var app = builder.Build();
 

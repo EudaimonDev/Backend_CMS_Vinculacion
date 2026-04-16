@@ -14,6 +14,8 @@ namespace CMSVinculacion.Application.Services
         private readonly IUserRepository _userRepo;
         private readonly IConfiguration _config;
 
+        private const int AccessTokenMinutes = 60;               
+        private const int RefreshSlidingMinutes = 30;                
         public AuthService(IUserRepository userRepo, IConfiguration config)
         {
             _userRepo = userRepo;
@@ -29,9 +31,18 @@ namespace CMSVinculacion.Application.Services
 
             var accessToken = GenerateAccessToken(user.UserId, user.Email, user.Role?.RoleName ?? "Editor");
             var refreshToken = GenerateRefreshToken();
-            var expiry = DateTime.UtcNow.AddHours(1);
 
-            await _userRepo.UpdateRefreshTokenAsync(user.UserId, refreshToken, DateTime.UtcNow.AddDays(7));
+            var now = DateTime.UtcNow;
+
+            user.LastLogin = now;
+
+            var refreshExpiry = now.AddMinutes(RefreshSlidingMinutes);
+
+            await _userRepo.UpdateRefreshTokenAsync(
+                user.UserId,
+                refreshToken,
+                refreshExpiry
+            );
 
             return new LoginResponseDto
             {
@@ -39,34 +50,65 @@ namespace CMSVinculacion.Application.Services
                 Mensaje = "Login exitoso.",
                 AccessToken = accessToken,
                 RefreshToken = refreshToken,
-                Expiration = expiry
+                Expiration = now.AddMinutes(AccessTokenMinutes)
             };
         }
 
         public async Task<LoginResponseDto> RefreshTokenAsync(string refreshToken)
         {
-            var user = await _userRepo.GetByRefreshTokenAsync(refreshToken);
-            if (user is null || user.RefreshTokenExpiry < DateTime.UtcNow)
-                return new LoginResponseDto { Exito = false, Mensaje = "Refresh token inválido o expirado." };
+            if (string.IsNullOrWhiteSpace(refreshToken))
+                return new LoginResponseDto { Exito = false, Mensaje = "Refresh token requerido." };
 
-            var newAccess = GenerateAccessToken(user.UserId, user.Email, user.Role?.RoleName ?? "Editor");
-            var newRefresh = GenerateRefreshToken();
-            await _userRepo.UpdateRefreshTokenAsync(user.UserId, newRefresh, DateTime.UtcNow.AddDays(7));
+            var user = await _userRepo.GetByRefreshTokenAsync(refreshToken);
+
+            if (user is null)
+                return new LoginResponseDto { Exito = false, Mensaje = "Refresh token inválido." };
+
+            var now = DateTime.UtcNow;
+
+            // 1. inactividad (30 min)
+            if (user.RefreshTokenExpiry < now)
+                return new LoginResponseDto { Exito = false, Mensaje = $"Sesión expirada por inactividad ({RefreshSlidingMinutes} min)." };
+
+            // 2. máximo 7 días desde login
+            if (!user.LastLogin.HasValue || now > user.LastLogin.Value.AddDays(7))
+                return new LoginResponseDto { Exito = false, Mensaje = "Sesión expirada (máximo 7 días)." };
+
+            // 3. generar nuevos tokens
+            var newAccessToken = GenerateAccessToken(
+                user.UserId,
+                user.Email,
+                user.Role?.RoleName ?? "Editor"
+            );
+
+            var newRefreshToken = GenerateRefreshToken();
+
+            // 4. actualizar actividad
+            user.LastLogin = now;
+
+            var newExpiry = now.AddMinutes(RefreshSlidingMinutes);
+
+            await _userRepo.UpdateRefreshTokenAsync(
+                user.UserId,
+                newRefreshToken,
+                newExpiry
+            );
 
             return new LoginResponseDto
             {
                 Exito = true,
                 Mensaje = "Token renovado.",
-                AccessToken = newAccess,
-                RefreshToken = newRefresh,
-                Expiration = DateTime.UtcNow.AddHours(1)
+                AccessToken = newAccessToken,
+                RefreshToken = newRefreshToken,
+                Expiration = now.AddMinutes(AccessTokenMinutes)
             };
         }
+
 
         public async Task LogoutAsync(string userId)
         {
             if (int.TryParse(userId, out var id))
-                await _userRepo.UpdateRefreshTokenAsync(id, string.Empty, DateTime.MinValue);
+                await _userRepo.UpdateRefreshTokenAsync(id, string.Empty, DateTime.UtcNow);
         }
 
         private string GenerateAccessToken(int userId, string email, string role)
