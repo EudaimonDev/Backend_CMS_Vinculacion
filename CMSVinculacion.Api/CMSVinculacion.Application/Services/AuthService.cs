@@ -66,15 +66,15 @@ namespace CMSVinculacion.Application.Services
 
             var now = DateTime.UtcNow;
 
-            // 1. inactividad (30 min)
+            // inactividad (30 min)
             if (user.RefreshTokenExpiry < now)
                 return new LoginResponseDto { Exito = false, Mensaje = $"Sesión expirada por inactividad ({RefreshSlidingMinutes} min)." };
 
-            // 2. máximo 7 días desde login
+            // máximo 7 días desde login
             if (!user.LastLogin.HasValue || now > user.LastLogin.Value.AddDays(7))
                 return new LoginResponseDto { Exito = false, Mensaje = "Sesión expirada (máximo 7 días)." };
 
-            // 3. generar nuevos tokens
+            // generar nuevos tokens
             var newAccessToken = GenerateAccessToken(
                 user.UserId,
                 user.Email,
@@ -83,7 +83,7 @@ namespace CMSVinculacion.Application.Services
 
             var newRefreshToken = GenerateRefreshToken();
 
-            // 4. actualizar actividad
+            // actualizar actividad
             user.LastLogin = now;
 
             var newExpiry = now.AddMinutes(RefreshSlidingMinutes);

@@ -69,19 +69,21 @@ namespace CMSVinculacion.Application.Services
         {
             var article = await _repo.GetByIdAsync(id);
             if (article is null) return null;
-
+            //actualizamos solo los datos del articulo
             article.Title = dto.Title;
             article.Slug = dto.Slug ?? GenerateSlug(dto.Title);
             article.ContentHtml = _sanitizer.Sanitize(dto.ContentHtml);
             article.FeaturedImage = dto.FeaturedImage;
             article.UpdatedAt = DateTime.UtcNow;
             article.UpdatedBy = updatedBy;
-            article.ArticleCategories = dto.CategoryIds
-                .Select(cid => new ArticleCategory { ArticleId = id, CategoryId = cid })
-                .ToList();
+            
 
             await _repo.UpdateAsync(article);
-            return ToResponseDto(article);
+            //actualizamos las categorias
+            await _repo.UpdateCategoriesAsync(id,dto.CategoryIds);
+            //llamamos a los articulos con sus nuevas categorias
+            var updatedArticle = await _repo.GetByIdAsync(id);
+            return ToResponseDto(updatedArticle!);
         }
 
         public async Task<bool> DeleteAsync(int id, string deletedBy)

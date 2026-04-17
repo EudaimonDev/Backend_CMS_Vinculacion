@@ -31,7 +31,7 @@ namespace CMSVinculacion.Infrastructure.Repositories
             var query = _context.Articles
                 .Include(a => a.Status)
                 .Include(a => a.ArticleCategories)!.ThenInclude(ac => ac.Category)
-                .Where(a => a.DeletedAt == null && a.Status!.StatusName == "Published");
+                .Where(a => a.DeletedAt == null && a.StatusId == 2);//correccion menor
 
             if (categoryId.HasValue)
                 query = query.Where(a => a.ArticleCategories!.Any(ac => ac.CategoryId == categoryId));
@@ -108,6 +108,17 @@ namespace CMSVinculacion.Infrastructure.Repositories
             article.UpdatedBy = updatedBy;
             if (statusId == 2) // Published
                 article.PublishedAt ??= DateTime.UtcNow;
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task UpdateCategoriesAsync(int articleId, List<int> categoryIds)
+        {
+            var existing = _context.ArticleCategories.Where(ac => ac.ArticleId == articleId);
+            _context.ArticleCategories.RemoveRange(existing);
+
+            // Insertar las nuevas
+            var newCategories = categoryIds.Select(cid => new ArticleCategory { ArticleId = articleId, CategoryId = cid });
+            await _context.ArticleCategories.AddRangeAsync(newCategories);
             await _context.SaveChangesAsync();
         }
     }
