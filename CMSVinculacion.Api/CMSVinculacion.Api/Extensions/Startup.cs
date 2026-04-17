@@ -106,12 +106,20 @@ namespace CMSVinculacion.Api.Extensions
                          OnMessageReceived = async context =>
                          {
                              var token = context.HttpContext.Items["DecryptedToken"] as string;
-                             context.Token = token?[7..];
+                             //cambio del context.Token = token?[7..]; al:
+                             context.Token = token;
                              await Task.CompletedTask;
                          },
                      };
                  });
+                services.AddAuthorization(options =>
+                {
+                    options.AddPolicy("AdminOnly", policy =>
+                        policy.RequireRole("Admin"));
 
+                    options.AddPolicy("AdminOrEditor", policy =>
+                        policy.RequireRole("Admin", "Editor"));
+                });
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             services.AddEndpointsApiExplorer();
@@ -200,7 +208,7 @@ namespace CMSVinculacion.Api.Extensions
                 app.UseDeveloperExceptionPage();
             }
             //app.UseMiddleware<LoguearRespuestaHTTPMiddleware>();
-            app.UseLoguearRespuestaHTTP();
+           
 
             app.UseSwagger();
             app.UseSwaggerUI(c =>
@@ -212,7 +220,7 @@ namespace CMSVinculacion.Api.Extensions
             app.UseRouting();
             app.UseAuthentication();
             app.UseAuthorization();
-
+            app.UseLoguearRespuestaHTTP();
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();

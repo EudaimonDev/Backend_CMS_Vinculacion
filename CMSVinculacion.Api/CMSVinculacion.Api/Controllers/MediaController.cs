@@ -14,7 +14,7 @@ namespace CMSVinculacion.Api.Controllers
 
         /// <summary>Subida de imagen (multipart/form-data).</summary>
         [HttpPost("admin/upload")]
-        [Authorize]
+        [Authorize(Policy = "AdminOrEditor")]
         public async Task<IActionResult> Upload(IFormFile file, [FromQuery] int? articleId)
         {
             if (file is null || file.Length == 0)
@@ -27,7 +27,7 @@ namespace CMSVinculacion.Api.Controllers
 
         /// <summary>Listado de medios subidos.</summary>
         [HttpGet("admin")]
-        [Authorize]
+        [Authorize(Policy = "AdminOrEditor")]
         public async Task<IActionResult> GetAll(
             [FromQuery] int page = 1,
             [FromQuery] int pageSize = 20) =>

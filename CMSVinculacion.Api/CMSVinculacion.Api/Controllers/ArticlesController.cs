@@ -48,7 +48,7 @@ namespace CMSVinculacion.Api.Controllers
 
         /// <summary>Listado admin (todos los estados).</summary>
         [HttpGet("admin")]
-        [Authorize]
+        [Authorize(Policy = "AdminOrEditor")]
         public async Task<IActionResult> GetAllAdmin(
             [FromQuery] int? statusId,
             [FromQuery] int? categoryId,
@@ -58,7 +58,7 @@ namespace CMSVinculacion.Api.Controllers
 
         /// <summary>Detalle admin (incluye borradores).</summary>
         [HttpGet("admin/{id:int}")]
-        [Authorize]
+        [Authorize(Policy = "AdminOrEditor")]
         public async Task<IActionResult> GetAdminById(int id)
         {
             var article = await _service.GetAdminByIdAsync(id);
@@ -67,7 +67,7 @@ namespace CMSVinculacion.Api.Controllers
 
         /// <summary>Crear artículo.</summary>
         [HttpPost("admin")]
-        [Authorize]
+        [Authorize(Policy = "AdminOrEditor")]
         public async Task<IActionResult> Create([FromBody] ArticleCreateDto dto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -78,7 +78,7 @@ namespace CMSVinculacion.Api.Controllers
 
         /// <summary>Editar artículo completo.</summary>
         [HttpPut("admin/{id:int}")]
-        [Authorize]
+        [Authorize(Policy = "AdminOrEditor")]
         public async Task<IActionResult> Update(int id, [FromBody] ArticleUpdateDto dto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -89,7 +89,7 @@ namespace CMSVinculacion.Api.Controllers
 
         /// <summary>Cambiar estado borrador ↔ publicado.</summary>
         [HttpPatch("admin/{id:int}/status")]
-        [Authorize]
+        [Authorize(Policy = "AdminOrEditor")]
         public async Task<IActionResult> UpdateStatus(int id, [FromBody] ArticleStatusUpdateDto dto)
         {
             var updatedBy = User.FindFirst("email")?.Value ?? "unknown";
@@ -99,7 +99,7 @@ namespace CMSVinculacion.Api.Controllers
 
         /// <summary>Eliminar artículo (soft delete).</summary>
         [HttpDelete("admin/{id:int}")]
-        [Authorize]
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> Delete(int id)
         {
             var deletedBy = User.FindFirst("email")?.Value ?? "unknown";
