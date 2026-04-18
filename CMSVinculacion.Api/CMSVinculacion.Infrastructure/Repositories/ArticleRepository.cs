@@ -53,28 +53,41 @@ namespace CMSVinculacion.Infrastructure.Repositories
                 .OrderByDescending(a => a.PublishedAt)
                 .Take(count)
                 .ToListAsync();
-
+        //agregar el asnotracking para  solo lectura
         public async Task<IEnumerable<Articles>> GetGalleryAsync() =>
             await _context.Articles
+                .AsNoTracking()
                 .Include(a => a.ArticleCategories)!.ThenInclude(ac => ac.Category)
                 .Where(a => a.DeletedAt == null && a.Status!.StatusName == "Published"
                          && a.FeaturedImage != null)
                 .OrderByDescending(a => a.PublishedAt)
                 .ToListAsync();
-
+        //agregar el asnotracking para  solo lectura
         public async Task<IEnumerable<Articles>> GetAllAdminAsync(
-            int? statusId, int? categoryId, int page, int pageSize) =>
-            await _context.Articles
+            int? statusId, int? categoryId, DateTime? startDate, int page, int pageSize)
+        {
+
+            var query = _context.Articles
+                .AsNoTracking()
                 .Include(a => a.Status)
                 .Include(a => a.Author)
                 .Include(a => a.ArticleCategories)!.ThenInclude(ac => ac.Category)
-                .Where(a => a.DeletedAt == null
-                    && (!statusId.HasValue || a.StatusId == statusId)
-                    && (!categoryId.HasValue || a.ArticleCategories!.Any(ac => ac.CategoryId == categoryId)))
-                .OrderByDescending(a => a.CreatedAt)
+                .Where(a => a.DeletedAt == null);
+
+                    if (statusId.HasValue)
+                    query = query.Where(a => a.StatusId == statusId);
+
+                    if (categoryId.HasValue)
+                    query = query.Where(a => a.ArticleCategories!.Any(ac => ac.CategoryId == categoryId));
+                    //Filtro de articlos a partir de esa fecha
+                    if (startDate.HasValue)
+                    query = query.Where(a => a.CreatedAt >= startDate.Value);
+
+                return await query.OrderByDescending(a => a.CreatedAt)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
+        }
 
         public async Task<Articles> CreateAsync(Articles article)
         {

@@ -52,11 +52,12 @@ namespace CMSVinculacion.Api.Controllers
         public async Task<IActionResult> GetAllAdmin(
             [FromQuery] int? statusId,
             [FromQuery] int? categoryId,
+            [FromQuery] DateTime? startDate,
             [FromQuery] int page = 1,
             [FromQuery] int pageSize = 20) =>
-            Ok(await _service.GetAllAdminAsync(statusId, categoryId, page, pageSize));
+            Ok(await _service.GetAllAdminAsync(statusId, categoryId, startDate, page, pageSize));
 
-        /// <summary>Detalle admin (incluye borradores).</summary>
+        /// <summary>Detalle admin (incluye borradores/publicados).</summary>
         [HttpGet("admin/{id:int}")]
         [Authorize]
         public async Task<IActionResult> GetAdminById(int id)

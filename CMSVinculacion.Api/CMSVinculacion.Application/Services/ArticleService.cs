@@ -37,8 +37,8 @@ namespace CMSVinculacion.Application.Services
             (await _repo.GetGalleryAsync()).Select(ToListDto);
 
         public async Task<IEnumerable<ArticleListDto>> GetAllAdminAsync(
-            int? statusId, int? categoryId, int page, int pageSize) =>
-            (await _repo.GetAllAdminAsync(statusId, categoryId, page, pageSize)).Select(ToListDto);
+            int? statusId, int? categoryId, DateTime? startDate,int page, int pageSize) =>
+            (await _repo.GetAllAdminAsync(statusId, categoryId,startDate, page, pageSize)).Select(ToListDto);
 
         public async Task<ArticleResponseDto?> GetAdminByIdAsync(int id)
         {

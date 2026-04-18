@@ -8,7 +8,7 @@ namespace CMSVinculacion.Application.Interfaces
         Task<(IEnumerable<Articles> Items, int Total)> GetPublishedPagedAsync(int page, int pageSize, int? categoryId = null);
         Task<IEnumerable<Articles>> GetRecentPublishedAsync(int count = 5);
         Task<IEnumerable<Articles>> GetGalleryAsync();
-        Task<IEnumerable<Articles>> GetAllAdminAsync(int? statusId, int? categoryId, int page, int pageSize);
+        Task<IEnumerable<Articles>> GetAllAdminAsync(int? statusId, int? categoryId, DateTime? startDate,int page, int pageSize);
         Task<Articles> CreateAsync(Articles article);
         Task UpdateAsync(Articles article);
         Task SoftDeleteAsync(int id, string deletedBy);

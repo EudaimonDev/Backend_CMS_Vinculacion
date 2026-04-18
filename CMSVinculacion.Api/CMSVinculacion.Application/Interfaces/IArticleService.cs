@@ -8,7 +8,7 @@ namespace CMSVinculacion.Application.Interfaces
         Task<ArticleResponseDto?> GetPublishedByIdAsync(int id);
         Task<IEnumerable<ArticleListDto>> GetRecentAsync(int count = 5);
         Task<IEnumerable<ArticleListDto>> GetGalleryAsync();
-        Task<IEnumerable<ArticleListDto>> GetAllAdminAsync(int? statusId, int? categoryId, int page, int pageSize);
+        Task<IEnumerable<ArticleListDto>> GetAllAdminAsync(int? statusId, int? categoryId, DateTime? startDate,int page, int pageSize);
         Task<ArticleResponseDto?> GetAdminByIdAsync(int id);
         Task<ArticleResponseDto> CreateAsync(ArticleCreateDto dto, int authorId);
         Task<ArticleResponseDto?> UpdateAsync(int id, ArticleUpdateDto dto, string updatedBy);

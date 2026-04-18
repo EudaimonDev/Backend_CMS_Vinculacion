@@ -1,4 +1,7 @@
 <Solution>
+  <Folder Name="/UnitTests/">
+    <Project Path="UnitTests/Article.UnitTests/Article.UnitTests.csproj" Id="22a948de-b41e-4c43-a7d2-90aa77e7225e" />
+  </Folder>
   <Project Path="CMSVinculacion.Api/CMSVinculacion.Api.csproj" />
   <Project Path="CMSVinculacion.Application/CMSVinculacion.Application.csproj" />
   <Project Path="CMSVinculacion.Domain/CMSVinculacion.Domain.csproj" />
