@@ -44,7 +44,7 @@ namespace CMSVinculacion.Api.Extensions
                 return new MediaService(repo, uploadsPath);
             });
             services.AddScoped<IAuthService, AuthService>();
-
+            services.AddScoped<IAuditLogRepository, AuditLogRepository>();
             return services;
         }
 

@@ -20,13 +20,13 @@ namespace CMSVinculacion.Api.Controllers
 
         /// <summary>Listado admin (todas las categorías).</summary>
         [HttpGet("admin")]
-        [Authorize]
+        [Authorize(Policy = "AdminOrEditor")]
         public async Task<IActionResult> GetAllAdmin() =>
             Ok(await _service.GetAllAsync(onlyPublic: false));
 
         /// <summary>Crear categoría.</summary>
         [HttpPost("admin")]
-        [Authorize]
+        [Authorize(Policy = "AdminOrEditor")]
         public async Task<IActionResult> Create([FromBody] CategoryCreateDto dto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -43,7 +43,7 @@ namespace CMSVinculacion.Api.Controllers
 
         /// <summary>Editar categoría.</summary>
         [HttpPut("admin/{id:int}")]
-        [Authorize]
+        [Authorize(Policy = "AdminOrEditor")]
         public async Task<IActionResult> Update(int id, [FromBody] CategoryUpdateDto dto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -60,7 +60,7 @@ namespace CMSVinculacion.Api.Controllers
 
         /// <summary>Eliminar categoría (retorna 409 si tiene artículos).</summary>
         [HttpDelete("admin/{id:int}")]
-        [Authorize]
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> Delete(int id)
         {
             try

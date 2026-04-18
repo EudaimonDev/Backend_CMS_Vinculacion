@@ -1,4 +1,9 @@
-﻿using Microsoft.AspNetCore.DataProtection;
+﻿using CMSVinculacion.Application.Interfaces;
+using CMSVinculacion.Domain.Entities.Seguridad;
+using CMSVinculacion.Infrastructure;
+using Microsoft.AspNetCore.DataProtection;
+using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace CMSVinculacion.Api.MIddlewares
 {
@@ -9,59 +14,95 @@ namespace CMSVinculacion.Api.MIddlewares
             return app.UseMiddleware<LoguearRespuestaHTTPMiddleware>();
         }
     }
+
     public class LoguearRespuestaHTTPMiddleware
     {
         private readonly RequestDelegate siguiente;
         private readonly IDataProtector dataProtector;
 
-        public LoguearRespuestaHTTPMiddleware(RequestDelegate siguiente, ILogger<LoguearRespuestaHTTPMiddleware> logger,
-            IDataProtectionProvider dataProtectionProvider, IConfiguration configuration)
+        public LoguearRespuestaHTTPMiddleware(
+            RequestDelegate siguiente,
+            ILogger<LoguearRespuestaHTTPMiddleware> logger,
+            IDataProtectionProvider dataProtectionProvider,
+            IConfiguration configuration)
         {
             this.siguiente = siguiente;
             dataProtector = dataProtectionProvider.CreateProtector(configuration["LlaveProtector"]);
         }
 
-        public async Task InvokeAsync(HttpContext contexto)
+        public async Task InvokeAsync(HttpContext contexto, IAuditLogRepository auditRepo)
         {
-            using (var ms = new MemoryStream())
+            var cuerpoOriginalRespuesta = contexto.Response.Body;
+
+            try
             {
+                using var ms = new MemoryStream();
+                contexto.Response.Body = ms;
+
                 string authorizationHeader = contexto.Request.Headers["Authorization"];
 
-                // 1. Verificamos que el header exista y sea un esquema que queremos procesar
-                if (!string.IsNullOrEmpty(authorizationHeader) && authorizationHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+                if (!string.IsNullOrEmpty(authorizationHeader) &&
+                    authorizationHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
                 {
                     try
                     {
-                        // 2. Extraemos solo el token (quitamos "Bearer ")
-                        string tokenLimpio = authorizationHeader.Substring("Bearer ".Length).Trim();
-
+                        string tokenLimpio = authorizationHeader["Bearer ".Length..].Trim();
                         string desencriptar = Desencriptar(tokenLimpio);
                         contexto.Items["DecryptedToken"] = desencriptar;
                     }
-                    catch (Exception ex)
+                    catch
                     {
-                        // Loguea el error pero permite que la petición siga, 
-                        // o maneja el error de seguridad según tu lógica.
-                        // _logger.LogWarning("No se pudo desencriptar el token: {Message}", ex.Message);
+                        // no rompe la API por token
                     }
                 }
-
-                var cuerpoOriginalRespuesta = contexto.Response.Body;
-                contexto.Response.Body = ms;
-
                 await siguiente(contexto);
+                foreach (var c in contexto.User.Claims)
+                {
+                    Console.WriteLine($"{c.Type} -> {c.Value}");
+                }
+                string email =
+                    contexto.User.FindFirst(ClaimTypes.Email)?.Value
+                    ?? contexto.User.FindFirst("email")?.Value;
 
-                ms.Seek(0, SeekOrigin.Begin);
-                string respuesta = new StreamReader(ms).ReadToEnd();
-                ms.Seek(0, SeekOrigin.Begin);
+                int? userId = null;
 
+                if (!string.IsNullOrEmpty(email))
+                {
+                    using var scope = contexto.RequestServices.CreateScope();
+                    var db = scope.ServiceProvider.GetRequiredService<SqlDbContext>();
+
+                    userId = await db.Users
+                        .Where(u => u.Email == email)
+                        .Select(u => (int?)u.UserId)
+                        .FirstOrDefaultAsync();
+                }
+
+                var log = new AuditLog
+                {
+                    Action = contexto.Request.Method,
+                    Entity = contexto.Request.Path,
+                    IPAddress = contexto.Connection.RemoteIpAddress?.ToString(),
+                    Detail = $"StatusCode: {contexto.Response.StatusCode}",
+                    UserId = userId
+                };
+                try
+                {
+                    await auditRepo.AddAsync(log);
+                }
+                catch
+                {
+                    // nunca romper la API por logging
+                }
+                ms.Seek(0, SeekOrigin.Begin);
                 await ms.CopyToAsync(cuerpoOriginalRespuesta);
                 contexto.Response.Body = cuerpoOriginalRespuesta;
-
-
-
+            }
+            finally
+            {
+                contexto.Response.Body = cuerpoOriginalRespuesta;
             }
         }
+
         private string Desencriptar(string tokenEncriptado)
         {
             return dataProtector.Unprotect(tokenEncriptado);
