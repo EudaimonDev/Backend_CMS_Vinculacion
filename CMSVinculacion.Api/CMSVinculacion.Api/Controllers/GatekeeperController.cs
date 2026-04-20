@@ -19,10 +19,8 @@ namespace CMSVinculacion.Api.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] GatekeeperRequestDto request)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
             var ip = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+
             var resultado = await _service.RegistrarVisitanteAsync(request, ip);
 
             if (!resultado.Exito)

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+/*
 namespace CMSVinculacion.Domain.Entities.Catalogos
 {
 
@@ -21,3 +21,4 @@ namespace CMSVinculacion.Domain.Entities.Catalogos
         public bool Active { get; set; } = true;
     }
 }
+*/

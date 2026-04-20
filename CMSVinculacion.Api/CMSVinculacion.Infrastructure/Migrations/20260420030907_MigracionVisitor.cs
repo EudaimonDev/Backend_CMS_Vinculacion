@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace CMSVinculacion.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class MigracionInicial : Migration
+    public partial class MigracionVisitor : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -47,6 +47,7 @@ namespace CMSVinculacion.Infrastructure.Migrations
                     Name = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false),
                     Slug = table.Column<string>(type: "varchar(120)", maxLength: 120, nullable: false),
                     Description = table.Column<string>(type: "varchar(300)", maxLength: 300, nullable: true),
+                    IsPublicVisible = table.Column<bool>(type: "bit", nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CreatedBy = table.Column<string>(type: "varchar(307)", maxLength: 307, nullable: true),
@@ -85,9 +86,9 @@ namespace CMSVinculacion.Infrastructure.Migrations
                 {
                     VisitorId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    FullName = table.Column<string>(type: "varchar(200)", maxLength: 200, nullable: false),
-                    Email = table.Column<string>(type: "varchar(200)", maxLength: 200, nullable: true),
-                    Institution = table.Column<string>(type: "varchar(300)", maxLength: 300, nullable: true),
+                    Edad = table.Column<int>(type: "int", nullable: false),
+                    Sexo = table.Column<string>(type: "varchar(150)", maxLength: 150, nullable: false),
+                    DataJson = table.Column<string>(type: "varchar(max)", nullable: true),
                     CookieToken = table.Column<string>(type: "varchar(512)", maxLength: 512, nullable: true),
                     IPAddress = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: true),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
@@ -118,6 +119,8 @@ namespace CMSVinculacion.Infrastructure.Migrations
                     PasswordHash = table.Column<string>(type: "varchar(512)", maxLength: 512, nullable: false),
                     RoleId = table.Column<int>(type: "int", nullable: true),
                     LastLogin = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    RefreshToken = table.Column<string>(type: "varchar(512)", maxLength: 512, nullable: true),
+                    RefreshTokenExpiry = table.Column<DateTime>(type: "datetime2", nullable: true),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CreatedBy = table.Column<string>(type: "varchar(307)", maxLength: 307, nullable: true),
@@ -153,7 +156,6 @@ namespace CMSVinculacion.Infrastructure.Migrations
                     FeaturedImage = table.Column<string>(type: "varchar(500)", maxLength: 500, nullable: true),
                     StatusId = table.Column<int>(type: "int", nullable: true),
                     AuthorId = table.Column<int>(type: "int", nullable: true),
-                    CategoryId = table.Column<int>(type: "int", nullable: true),
                     PublishedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
                     ViewCount = table.Column<int>(type: "int", nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
@@ -176,12 +178,6 @@ namespace CMSVinculacion.Infrastructure.Migrations
                         principalSchema: "CON",
                         principalTable: "ArticleStatus",
                         principalColumn: "StatusId");
-                    table.ForeignKey(
-                        name: "FK_Articles_Categories_CategoryId",
-                        column: x => x.CategoryId,
-                        principalSchema: "CAT",
-                        principalTable: "Categories",
-                        principalColumn: "CategoryId");
                     table.ForeignKey(
                         name: "FK_Articles_Users_AuthorId",
                         column: x => x.AuthorId,
@@ -227,6 +223,33 @@ namespace CMSVinculacion.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ArticleCategory",
+                schema: "CON",
+                columns: table => new
+                {
+                    ArticleId = table.Column<int>(type: "int", nullable: false),
+                    CategoryId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ArticleCategory", x => new { x.ArticleId, x.CategoryId });
+                    table.ForeignKey(
+                        name: "FK_ArticleCategory_Articles_ArticleId",
+                        column: x => x.ArticleId,
+                        principalSchema: "CON",
+                        principalTable: "Articles",
+                        principalColumn: "ArticleId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ArticleCategory_Categories_CategoryId",
+                        column: x => x.CategoryId,
+                        principalSchema: "CAT",
+                        principalTable: "Categories",
+                        principalColumn: "CategoryId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "MediaFiles",
                 schema: "CON",
                 columns: table => new
@@ -263,16 +286,16 @@ namespace CMSVinculacion.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_ArticleCategory_CategoryId",
+                schema: "CON",
+                table: "ArticleCategory",
+                column: "CategoryId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Articles_AuthorId",
                 schema: "CON",
                 table: "Articles",
                 column: "AuthorId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Articles_CategoryId",
-                schema: "CON",
-                table: "Articles",
-                column: "CategoryId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Articles_StatusId",
@@ -303,6 +326,10 @@ namespace CMSVinculacion.Infrastructure.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
+                name: "ArticleCategory",
+                schema: "CON");
+
+            migrationBuilder.DropTable(
                 name: "AuditLog",
                 schema: "SEG");
 
@@ -315,16 +342,16 @@ namespace CMSVinculacion.Infrastructure.Migrations
                 schema: "GAT");
 
             migrationBuilder.DropTable(
+                name: "Categories",
+                schema: "CAT");
+
+            migrationBuilder.DropTable(
                 name: "Articles",
                 schema: "CON");
 
             migrationBuilder.DropTable(
                 name: "ArticleStatus",
                 schema: "CON");
-
-            migrationBuilder.DropTable(
-                name: "Categories",
-                schema: "CAT");
 
             migrationBuilder.DropTable(
                 name: "Users",

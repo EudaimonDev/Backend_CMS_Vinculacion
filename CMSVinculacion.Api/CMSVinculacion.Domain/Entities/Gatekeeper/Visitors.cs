@@ -14,12 +14,11 @@ namespace CMSVinculacion.Domain.Entities.Gatekeeper
     {
         [Key]
         public int VisitorId { get; set; }
-        [MaxLength(200)]
-        public string FullName { get; set; } = string.Empty;
-        [MaxLength(200)]
-        public string? Email { get; set; } = string.Empty;
-        [MaxLength (300)]
-        public string? Institution { get; set; } = string.Empty;
+        public int Edad { get; set; }
+        [MaxLength(150)]
+        public string Sexo { get; set; }
+
+        public string? DataJson { get; set; }
 
         [MaxLength(512)]
         public string? CookieToken { get; set; } = string.Empty;

@@ -8,8 +8,9 @@ namespace CMSVinculacion.Application.DTOs.gatekeeper
 {
     public class GatekeeperRequestDto
     {
-        public string Nombre { get; set; } = string.Empty;
-        public string Email { get; set; } = string.Empty;
-        public string Institucion { get; set; } = string.Empty;
+        public int Edad { get; set; }
+        public string Sexo { get; set; } = string.Empty;
+
+        public Dictionary<string, object>? Extras { get; set; }
     }
 }
