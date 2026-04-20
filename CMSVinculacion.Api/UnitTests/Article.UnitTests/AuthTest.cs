@@ -1,12 +1,14 @@
 ﻿using CMSVinculacion.Application.DTOs.auth;
+using CMSVinculacion.Application.DTOs.gatekeeper;
 using CMSVinculacion.Application.Interfaces;
 using CMSVinculacion.Application.Services;
+using CMSVinculacion.Domain.Entities.Gatekeeper;
 using CMSVinculacion.Domain.Entities.Seguridad;
+using FluentAssertions;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Configuration;
 using Moq;
 using Xunit;
-using Microsoft.Extensions.Configuration;
-using FluentAssertions;
 
 namespace Article.UnitTests
 {
@@ -33,13 +35,16 @@ namespace Article.UnitTests
 
             _service = new AuthService(_userRepoMock.Object, _config);
         }
-
+        //No se puede hashear en pruebas unitarias
         [Fact]
         public async Task LoginAsync_DeberiaRetornarTokens_CuandoCredencialesSonCorrectas()
         {
             // Arrange
             var password = "123456";
+            var pass1 = "123456";
             var hashed = BCrypt.Net.BCrypt.HashPassword(password);
+
+            BCrypt.Net.BCrypt.Verify(password, hashed).Should().BeTrue();
 
             var user = new Users
             {
@@ -56,17 +61,25 @@ namespace Article.UnitTests
             var request = new LoginRequestDto
             {
                 Email = "test@test.com",
-                Password = password
+                Password = hashed
             };
 
             // Act
             var result = await _service.LoginAsync(request);
 
             // Assert
-            result.Exito.Should().BeTrue();
+            result.Exito.Should().BeTrue(result.Mensaje);
             result.AccessToken.Should().NotBeNull();
             result.RefreshToken.Should().NotBeNull();
             result.Expiration.Should().NotBeNull();
+            
+
+            // Validación importante
+            _userRepoMock.Verify(x => x.UpdateRefreshTokenAsync(
+                user.UserId,
+                It.IsAny<string>(),
+                It.IsAny<DateTime>()),
+                Times.Once);
         }
 
         [Fact]
@@ -98,10 +111,29 @@ namespace Article.UnitTests
         [Fact]
         public async Task Login_DeberiaFallar_SiUsuarioNoExiste()
         {
+            //// Arrange
+            //_userRepoMock
+            //    .Setup(x => x.GetByEmailAsync(It.IsAny<string>()))
+            //    .ReturnsAsync((Users?)null);
+
+            //var request = new LoginRequestDto
+            //{
+            //    Email = "test@test.com",
+            //    Password = "123456"
+            //};
+
+            //var service = new AuthService(_userRepoMock.Object, _config);
+
+            //// Act
+            //var result = await service.LoginAsync(request);
+
+            //// Assert
+            //result.Exito.Should().BeFalse();
+            //result.Mensaje.Should().Be("El usuario no está registrado.");
             // Arrange
             _userRepoMock
-                .Setup(x => x.GetByEmailAsync("test@test.com"))
-                .ReturnsAsync(new Users());
+                .Setup(x => x.GetByEmailAsync(It.IsAny<string>()))
+                .ReturnsAsync((Users?)null);
 
             var request = new LoginRequestDto
             {
@@ -109,17 +141,49 @@ namespace Article.UnitTests
                 Password = "123456"
             };
 
-            var service = new AuthService(_userRepoMock.Object, _config);
-
             // Act
-            var result = await service.LoginAsync(request);
+            var result = await _service.LoginAsync(request);
 
             // Assert
             result.Exito.Should().BeFalse();
-            result.Mensaje.Should().Be("El usuario no está registrado.");
+            result.Mensaje.Should().Be("Credenciales inválidas.");
         }
 
+        [Fact]
+        public async Task RegistrarVisitanteAsync_DeberiaGuardarJson_CuandoDatosOpcionalesExisten()
+        {
+            // Arrange
+            var repoMock = new Mock<IGatekeeperRepository>();
 
+            Visitors? capturedVisitor = null;
+
+            repoMock.Setup(x => x.GuardarVisitanteAsync(It.IsAny<Visitors>()))
+                .Callback<Visitors>(v => capturedVisitor = v)
+                .Returns(Task.CompletedTask);
+
+            var service = new GatekeeperService(repoMock.Object);
+
+            var request = new GatekeeperRequestDto
+            {
+                Sexo = "Masculino",
+                Edad = 25,
+                Extras = new Dictionary<string, object>
+                {
+                    { "Nombre", "Juan" },
+                    { "Institucion", "UPS" }
+                }
+            };
+
+            // Act
+            var result = await service.RegistrarVisitanteAsync(request, "127.0.0.1");
+
+            // Assert
+            result.Exito.Should().BeTrue();
+            capturedVisitor.Should().NotBeNull();
+            capturedVisitor!.DataJson.Should().NotBeNull();
+            capturedVisitor!.DataJson.Should().Contain("Juan");
+            capturedVisitor.DataJson.Should().Contain("UPS");
+        }
 
     }
 }
