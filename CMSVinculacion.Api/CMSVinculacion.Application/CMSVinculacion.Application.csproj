@@ -8,8 +8,10 @@
 
 	<ItemGroup>
 		<PackageReference Include="Azure.AI.Language.Conversations" Version="1.1.0" />
+		<PackageReference Include="BCrypt.Net-Next" Version="4.1.0" />
 		<PackageReference Include="Gridify" Version="2.16.3" />
 		<PackageReference Include="Gridify.EntityFramework" Version="2.16.3" />
+		<PackageReference Include="HtmlSanitizer" Version="9.0.892" />
 		<PackageReference Include="LLamaSharp" Version="0.25.0" />
 		<PackageReference Include="LLamaSharp.Backend.Cpu" Version="0.25.0" />
 		<PackageReference Include="Microsoft.AspNetCore.JsonPatch" Version="9.0.8" />
@@ -19,8 +21,10 @@
 		<PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="9.0.8" />
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.8" />
 		<PackageReference Include="Microsoft.Extensions.Http" Version="9.0.8" />
+		<PackageReference Include="Microsoft.IdentityModel.Tokens" Version="8.17.0" />
 		<PackageReference Include="Microsoft.Recognizers.Text" Version="1.8.13" />
 		<PackageReference Include="Microsoft.Recognizers.Text.DateTime" Version="1.8.13" />
+		<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.17.0" />
 		<PackageReference Include="System.Linq.Dynamic.Core" Version="1.6.7" />
 	</ItemGroup>
   <ItemGroup>

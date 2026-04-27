@@ -1,4 +1,4 @@
-﻿using CMSVinculacion.Domain.Entities.Seguridad;
+﻿/*using CMSVinculacion.Domain.Entities.Seguridad;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -13,3 +13,6 @@ namespace CMSVinculacion.Domain.Entities.Catalogos
         public string Nombre { get; set; } = string.Empty;
     }
 }
+*/
+
+//No usar esta clase, es una guia para el gatekeeper

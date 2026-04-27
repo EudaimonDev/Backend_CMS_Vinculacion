@@ -4,7 +4,7 @@ namespace CMSVinculacion.Domain.Entities.Seguridad
 {
     public class Audit
     {
-        public bool Active { get; set; } = true;
+        public bool IsActive { get; set; } = true;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         [MaxLength(307)]
         public string? CreatedBy { get; set; }
