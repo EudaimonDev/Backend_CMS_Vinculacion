@@ -74,7 +74,7 @@ namespace CMSVinculacion.Api.Controllers
             if (!ModelState.IsValid) return BadRequest(ModelState);
             var authorId = int.Parse(User.FindFirst("userId")?.Value ?? "0");
             var created = await _service.CreateAsync(dto, authorId);
-            return CreatedAtAction(nameof(GetAdminById), new { id = created.ArticleId }, created);
+            return CreatedAtAction(nameof(GetAdminById), new { id = created.Id }, created);
         }
 
         /// <summary>Editar artículo completo.</summary>
