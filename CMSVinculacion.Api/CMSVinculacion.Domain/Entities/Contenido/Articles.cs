@@ -21,6 +21,20 @@ namespace CMSVinculacion.Domain.Entities.Contenido
         [MaxLength(500)]
         public string? FeaturedImage { get; set; }
 
+        // Campo emoji para el front
+        [MaxLength(10)]
+        public string? Emoji { get; set; }
+
+        // Extracto/resumen del artículo
+        [MaxLength(500)]
+        public string? Excerpt { get; set; }
+
+        // Tiempo de lectura estimado en minutos
+        public int ReadingTime { get; set; } = 1;
+
+        // Artículo destacado (hero)
+        public bool Featured { get; set; } = false;
+
         public int? StatusId { get; set; }
         public ArticleStatus? Status { get; set; }
 
@@ -31,9 +45,7 @@ namespace CMSVinculacion.Domain.Entities.Contenido
 
         public int ViewCount { get; set; }
 
-        // Relación N:M con Categories via tabla intermedia
         public ICollection<ArticleCategory>? ArticleCategories { get; set; }
-
         public ICollection<MediaFiles>? MediaFiles { get; set; }
     }
 }

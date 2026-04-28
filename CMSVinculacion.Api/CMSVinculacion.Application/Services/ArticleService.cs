@@ -52,6 +52,10 @@ namespace CMSVinculacion.Application.Services
             {
                 Title = dto.Title,
                 Slug = dto.Slug ?? GenerateSlug(dto.Title),
+                Emoji = dto.Emoji,
+                Excerpt = dto.Excerpt,
+                ReadingTime = dto.ReadingTime,
+                Featured = dto.Featured,
                 ContentHtml = _sanitizer.Sanitize(dto.ContentHtml),
                 FeaturedImage = dto.FeaturedImage,
                 AuthorId = authorId,
@@ -72,6 +76,10 @@ namespace CMSVinculacion.Application.Services
             //actualizamos solo los datos del articulo
             article.Title = dto.Title;
             article.Slug = dto.Slug ?? GenerateSlug(dto.Title);
+            article.Emoji = dto.Emoji;
+            article.Excerpt = dto.Excerpt;
+            article.ReadingTime = dto.ReadingTime;
+            article.Featured = dto.Featured;
             article.ContentHtml = _sanitizer.Sanitize(dto.ContentHtml);
             article.FeaturedImage = dto.FeaturedImage;
             article.UpdatedAt = DateTime.UtcNow;
@@ -109,25 +117,41 @@ namespace CMSVinculacion.Application.Services
 
         private static ArticleListDto ToListDto(Articles a) => new()
         {
-            ArticleId = a.ArticleId,
+            Id = a.ArticleId.ToString(),
             Title = a.Title,
             Slug = a.Slug,
-            FeaturedImage = a.FeaturedImage,
-            StatusName = a.Status?.StatusName,
+            ImageUrl = a.FeaturedImage,
+            Emoji = a.Emoji,
+            Excerpt = a.Excerpt,
+            ReadingTime = a.ReadingTime,
+            Featured = a.Featured,
+            Category = a.ArticleCategories?.FirstOrDefault()?.Category?.Name?.ToLower(),
             Categories = a.ArticleCategories?.Select(ac => ac.Category?.Name ?? "").ToList() ?? new(),
+            StatusName = a.Status?.StatusName,
+            Date = a.PublishedAt.HasValue
+        ? a.PublishedAt.Value.ToString("d MMM yyyy", new System.Globalization.CultureInfo("es-ES"))
+        : a.CreatedAt.ToString("d MMM yyyy", new System.Globalization.CultureInfo("es-ES")),
             PublishedAt = a.PublishedAt
         };
 
         private static ArticleResponseDto ToResponseDto(Articles a) => new()
         {
-            ArticleId = a.ArticleId,
+            Id = a.ArticleId.ToString(),
             Title = a.Title,
             Slug = a.Slug,
             ContentHtml = a.ContentHtml,
-            FeaturedImage = a.FeaturedImage,
+            ImageUrl = a.FeaturedImage,
+            Emoji = a.Emoji,
+            Excerpt = a.Excerpt,
+            ReadingTime = a.ReadingTime,
+            Featured = a.Featured,
+            Category = a.ArticleCategories?.FirstOrDefault()?.Category?.Name?.ToLower(),
+            Categories = a.ArticleCategories?.Select(ac => ac.Category?.Name ?? "").ToList() ?? new(),
             StatusName = a.Status?.StatusName,
             AuthorUsername = a.Author?.Username,
-            Categories = a.ArticleCategories?.Select(ac => ac.Category?.Name ?? "").ToList() ?? new(),
+            Date = a.PublishedAt.HasValue
+                ? a.PublishedAt.Value.ToString("d MMM yyyy", new System.Globalization.CultureInfo("es-ES"))
+                : a.CreatedAt.ToString("d MMM yyyy", new System.Globalization.CultureInfo("es-ES")),
             PublishedAt = a.PublishedAt,
             ViewCount = a.ViewCount,
             CreatedAt = a.CreatedAt,

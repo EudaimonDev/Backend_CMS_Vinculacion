@@ -8,15 +8,9 @@ namespace CMSVinculacion.Infrastructure
     {
         public SqlDbContext CreateDbContext(string[] args)
         {
-            var configuration = new ConfigurationBuilder()
-                .SetBasePath(Path.Combine(Directory.GetCurrentDirectory(),
-                    "../CMSVinculacion.Api"))
-                .AddJsonFile("appsettings.json")
-                .Build();
-
             var optionsBuilder = new DbContextOptionsBuilder<SqlDbContext>();
             optionsBuilder.UseSqlServer(
-                configuration.GetConnectionString("defaultConnection"));
+                "Server=localhost\\SQLEXPRESS01;Database=CMSVinculacion;Trusted_Connection=True;TrustServerCertificate=True");
 
             return new SqlDbContext(optionsBuilder.Options);
         }
