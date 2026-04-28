@@ -1,0 +1,422 @@
+{
+  "info": {
+    "_postman_id": "a2c197eb-439e-485a-ace1-7f6e9fd32dce",
+    "name": "VINCULACION_BACKEND",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "25646747"
+  },
+  "item": [
+    {
+      "name": "GATEKEEPER",
+      "item": []
+    },
+    {
+      "name": "ARTICLES",
+      "item": [
+        {
+          "name": "CreateCategory",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer TU_TOKEN_AQUI"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"name\": \"Investigación\",\r\n  \"slug\": \"investigacion\",\r\n  \"description\": \"Artículos de investigación\",\r\n  \"isPublicVisible\": true\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://localhost:7218/api/Categories/admin",
+              "protocol": "https",
+              "host": [
+                "localhost"
+              ],
+              "port": "7218",
+              "path": [
+                "api",
+                "Categories",
+                "admin"
+              ]
+            },
+            "description": "Generated from cURL: curl -X POST 'https://localhost:7218/api/Categories/admin' \\\r\n  -H 'Content-Type: application/json' \\\r\n  -H 'Authorization: Bearer TU_TOKEN_AQUI' \\\r\n  -d '{\r\n  \"name\": \"Investigación\",\r\n  \"slug\": \"investigacion\",\r\n  \"description\": \"Artículos de investigación\",\r\n  \"isPublicVisible\": true\r\n}'"
+          },
+          "response": []
+        },
+        {
+          "name": "CreateArticle",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer TU_TOKEN_AQUI"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"title\": \"Nuevos avances en inteligencia artificial\",\r\n  \"contentHtml\": \"<p>Contenido del artículo</p>\",\r\n  \"excerpt\": \"Investigadores presentan resultados de su estudio sobre IA.\",\r\n  \"emoji\": \"🔬\",\r\n  \"readingTime\": 5,\r\n  \"featured\": false,\r\n  \"featuredImage\": null,\r\n  \"categoryIds\": [1]\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://localhost:7218/api/Articles/admin",
+              "protocol": "https",
+              "host": [
+                "localhost"
+              ],
+              "port": "7218",
+              "path": [
+                "api",
+                "Articles",
+                "admin"
+              ]
+            },
+            "description": "Generated from cURL: curl -X POST 'https://localhost:7218/api/Articles/admin' \\\r\n  -H 'Content-Type: application/json' \\\r\n  -H 'Authorization: Bearer TU_TOKEN_AQUI' \\\r\n  -d '{\r\n  \"title\": \"Nuevos avances en inteligencia artificial\",\r\n  \"contentHtml\": \"<p>Contenido del artículo</p>\",\r\n  \"excerpt\": \"Investigadores presentan resultados de su estudio sobre IA.\",\r\n  \"emoji\": \"🔬\",\r\n  \"readingTime\": 5,\r\n  \"featured\": false,\r\n  \"featuredImage\": null,\r\n  \"categoryIds\": [1]\r\n}'"
+          },
+          "response": []
+        },
+        {
+          "name": "PublicArticle",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer TU_TOKEN_AQUI"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"statusId\": 2\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://localhost:7218/api/Articles/admin/1/status",
+              "protocol": "https",
+              "host": [
+                "localhost"
+              ],
+              "port": "7218",
+              "path": [
+                "api",
+                "Articles",
+                "admin",
+                "1",
+                "status"
+              ]
+            },
+            "description": "Generated from cURL: curl -X PATCH 'https://localhost:7218/api/Articles/admin/1/status' \\\r\n  -H 'Content-Type: application/json' \\\r\n  -H 'Authorization: Bearer TU_TOKEN_AQUI' \\\r\n  -d '{\r\n  \"statusId\": 2\r\n}'"
+          },
+          "response": []
+        },
+        {
+          "name": "ViewPublicArticle",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://localhost:7218/api/Articles?page=1&pageSize=10",
+              "protocol": "https",
+              "host": [
+                "localhost"
+              ],
+              "port": "7218",
+              "path": [
+                "api",
+                "Articles"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "Generated from cURL: curl -X GET 'https://localhost:7218/api/Articles?page=1&pageSize=10'"
+          },
+          "response": []
+        },
+        {
+          "name": "ViewRecentArticle",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://localhost:7218/api/Articles/recent?count=5",
+              "protocol": "https",
+              "host": [
+                "localhost"
+              ],
+              "port": "7218",
+              "path": [
+                "api",
+                "Articles",
+                "recent"
+              ],
+              "query": [
+                {
+                  "key": "count",
+                  "value": "5"
+                }
+              ]
+            },
+            "description": "Generated from cURL: curl -X GET 'https://localhost:7218/api/Articles/recent?count=5'"
+          },
+          "response": []
+        },
+        {
+          "name": "ViewGallery",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://localhost:7218/api/Articles/gallery",
+              "protocol": "https",
+              "host": [
+                "localhost"
+              ],
+              "port": "7218",
+              "path": [
+                "api",
+                "Articles",
+                "gallery"
+              ]
+            },
+            "description": "Generated from cURL: curl -X GET 'https://localhost:7218/api/Articles/gallery'"
+          },
+          "response": []
+        },
+        {
+          "name": "ViewArticleDetails",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://localhost:7218/api/Articles/1",
+              "protocol": "https",
+              "host": [
+                "localhost"
+              ],
+              "port": "7218",
+              "path": [
+                "api",
+                "Articles",
+                "1"
+              ]
+            },
+            "description": "Generated from cURL: curl -X GET 'https://localhost:7218/api/Articles/1'"
+          },
+          "response": []
+        },
+        {
+          "name": "ListArticleAdminFilter",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer TU_TOKEN_AQUI"
+              }
+            ],
+            "url": {
+              "raw": "https://localhost:7218/api/Articles/admin?page=1&pageSize=20",
+              "protocol": "https",
+              "host": [
+                "localhost"
+              ],
+              "port": "7218",
+              "path": [
+                "api",
+                "Articles",
+                "admin"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Generated from cURL: curl -X GET 'https://localhost:7218/api/Articles/admin?page=1&pageSize=20' \\\r\n  -H 'Authorization: Bearer TU_TOKEN_AQUI'"
+          },
+          "response": []
+        },
+        {
+          "name": "EditArticle",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer TU_TOKEN_AQUI"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"title\": \"Título actualizado\",\r\n  \"contentHtml\": \"<p>Contenido actualizado</p>\",\r\n  \"excerpt\": \"Extracto actualizado\",\r\n  \"emoji\": \"🚀\",\r\n  \"readingTime\": 3,\r\n  \"featured\": true,\r\n  \"featuredImage\": null,\r\n  \"categoryIds\": [1]\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://localhost:7218/api/Articles/admin/1",
+              "protocol": "https",
+              "host": [
+                "localhost"
+              ],
+              "port": "7218",
+              "path": [
+                "api",
+                "Articles",
+                "admin",
+                "1"
+              ]
+            },
+            "description": "Generated from cURL: curl -X PUT 'https://localhost:7218/api/Articles/admin/1' \\\r\n  -H 'Content-Type: application/json' \\\r\n  -H 'Authorization: Bearer TU_TOKEN_AQUI' \\\r\n  -d '{\r\n  \"title\": \"Título actualizado\",\r\n  \"contentHtml\": \"<p>Contenido actualizado</p>\",\r\n  \"excerpt\": \"Extracto actualizado\",\r\n  \"emoji\": \"🚀\",\r\n  \"readingTime\": 3,\r\n  \"featured\": true,\r\n  \"featuredImage\": null,\r\n  \"categoryIds\": [1]\r\n}'"
+          },
+          "response": []
+        },
+        {
+          "name": "DeleteArticle",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer TU_TOKEN_AQUI"
+              }
+            ],
+            "url": {
+              "raw": "https://localhost:7218/api/Articles/admin/1",
+              "protocol": "https",
+              "host": [
+                "localhost"
+              ],
+              "port": "7218",
+              "path": [
+                "api",
+                "Articles",
+                "admin",
+                "1"
+              ]
+            },
+            "description": "Generated from cURL: curl -X DELETE 'https://localhost:7218/api/Articles/admin/1' \\\r\n  -H 'Authorization: Bearer TU_TOKEN_AQUI'"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "REGISTRAR_VISITANTE",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"nombre\": \"Juan Perez\",\r\n  \"email\": \"juan@test.com\",\r\n  \"institucion\": \"Universidad de Guayaquil\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://localhost:7218/api/Gatekeeper/register",
+          "protocol": "https",
+          "host": [
+            "localhost"
+          ],
+          "port": "7218",
+          "path": [
+            "api",
+            "Gatekeeper",
+            "register"
+          ]
+        },
+        "description": "Generated from cURL: curl -X POST 'https://localhost:7218/api/Gatekeeper/register' \\\r\n  -H 'Content-Type: application/json' \\\r\n  -d '{\r\n  \"nombre\": \"Juan Perez\",\r\n  \"email\": \"juan@test.com\",\r\n  \"institucion\": \"Universidad de Guayaquil\"\r\n}'"
+      },
+      "response": []
+    },
+    {
+      "name": "LOGIN_ADMIN",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"email\": \"admin@cms.com\",\r\n  \"password\": \"Admin123!\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://localhost:7218/api/Auth/login",
+          "protocol": "https",
+          "host": [
+            "localhost"
+          ],
+          "port": "7218",
+          "path": [
+            "api",
+            "Auth",
+            "login"
+          ]
+        },
+        "description": "Generated from cURL: curl -X POST 'https://localhost:7218/api/Auth/login' \\\r\n  -H 'Content-Type: application/json' \\\r\n  -d '{\r\n  \"email\": \"admin@cms.com\",\r\n  \"password\": \"Admin123!\"\r\n}'"
+      },
+      "response": []
+    }
+  ]
+}
