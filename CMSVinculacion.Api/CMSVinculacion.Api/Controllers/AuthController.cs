@@ -22,16 +22,7 @@ namespace CMSVinculacion.Api.Controllers
 
             var result = await _service.LoginAsync(dto);
 
-            if (!result.Exito)
-                return Unauthorized(new { message = result.Mensaje });
-
-            return Ok(new
-            {
-                token = result.AccessToken,
-                refreshToken = result.RefreshToken,
-                expiration = result.Expiration,
-                user = result.User
-            });
+            return result.Exito ? Ok(result) : Unauthorized(result);
         }
 
         /// <summary>Renueva el access token usando el refresh token.</summary>

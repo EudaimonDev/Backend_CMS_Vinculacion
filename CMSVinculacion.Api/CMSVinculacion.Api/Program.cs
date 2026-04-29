@@ -24,8 +24,6 @@ builder.Services.AddDataProtection();
 
 var app = builder.Build();
 
-app.MapGet("/hash", () => BCrypt.Net.BCrypt.HashPassword("123456"));//clavetemporaltesteo
-
 
 var servicioLogger = (ILogger<Startup>)app.Services.GetService(typeof(ILogger<Startup>))!;
 startup.Configure(app, app.Environment, servicioLogger);

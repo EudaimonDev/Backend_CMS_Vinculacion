@@ -1,5 +1,6 @@
 ﻿using CMSVinculacion.Application.DTOs.auth;
 using CMSVinculacion.Application.Interfaces;
+using CMSVinculacion.Domain.Entities.Seguridad;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -50,7 +51,8 @@ namespace CMSVinculacion.Application.Services
                 Mensaje = "Login exitoso.",
                 AccessToken = accessToken,
                 RefreshToken = refreshToken,
-                Expiration = now.AddMinutes(AccessTokenMinutes)
+                Expiration = now.AddMinutes(AccessTokenMinutes),
+                User = MapUser(user)
             };
         }
 
@@ -102,13 +104,7 @@ namespace CMSVinculacion.Application.Services
                 RefreshToken = newRefreshToken,
                 Expiration = now.AddMinutes(AccessTokenMinutes),
 
-                 User = new UserDto
-                 {
-                     Id = user.UserId,
-                     Name = user.Username,
-                     Email = user.Email,
-                     Role = user.Role != null ? user.Role.RoleName : "Editor"
-                 }
+                 User = MapUser(user)
             };
         }
 
@@ -148,6 +144,17 @@ namespace CMSVinculacion.Application.Services
             var bytes = new byte[64];
             RandomNumberGenerator.Fill(bytes);
             return Convert.ToBase64String(bytes);
+        }
+
+        private static UserDto MapUser(Users user)
+        {
+            return new UserDto
+            {
+                Id = user.UserId,
+                Name = user.Username,
+                Email = user.Email,
+                Role = user.Role?.RoleName ?? "Editor"
+            };
         }
     }
 }
