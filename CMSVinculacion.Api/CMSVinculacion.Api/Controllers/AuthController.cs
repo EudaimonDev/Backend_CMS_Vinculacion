@@ -17,9 +17,21 @@ namespace CMSVinculacion.Api.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequestDto dto)
         {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
+            if (!ModelState.IsValid)
+                return BadRequest(new { message = "Datos inválidos" });
+
             var result = await _service.LoginAsync(dto);
-            return result.Exito ? Ok(result) : Unauthorized(result);
+
+            if (!result.Exito)
+                return Unauthorized(new { message = result.Mensaje });
+
+            return Ok(new
+            {
+                token = result.AccessToken,
+                refreshToken = result.RefreshToken,
+                expiration = result.Expiration,
+                user = result.User
+            });
         }
 
         /// <summary>Renueva el access token usando el refresh token.</summary>
