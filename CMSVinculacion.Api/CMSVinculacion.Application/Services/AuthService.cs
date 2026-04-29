@@ -100,7 +100,15 @@ namespace CMSVinculacion.Application.Services
                 Mensaje = "Token renovado.",
                 AccessToken = newAccessToken,
                 RefreshToken = newRefreshToken,
-                Expiration = now.AddMinutes(AccessTokenMinutes)
+                Expiration = now.AddMinutes(AccessTokenMinutes),
+
+                 User = new UserDto
+                 {
+                     Id = user.UserId,
+                     Name = user.Username,
+                     Email = user.Email,
+                     Role = user.Role != null ? user.Role.RoleName : "Editor"
+                 }
             };
         }
 
