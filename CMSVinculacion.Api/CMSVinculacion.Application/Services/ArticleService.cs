@@ -59,14 +59,27 @@ namespace CMSVinculacion.Application.Services
                 ContentHtml = _sanitizer.Sanitize(dto.ContentHtml),
                 FeaturedImage = dto.FeaturedImage,
                 AuthorId = authorId,
-                StatusId = 1, // Draft
-                CreatedAt = DateTime.UtcNow,
-                ArticleCategories = dto.CategoryIds
-                    .Select(cid => new ArticleCategory { CategoryId = cid })
-                    .ToList()
+                StatusId = 1,
+                CreatedAt = DateTime.UtcNow
             };
+            //preub
+            if (dto.CategoryIds == null || !dto.CategoryIds.Any())
+            {
+                throw new Exception("No se enviaron categorías");
+            }
+
             var created = await _repo.CreateAsync(article);
-            return ToResponseDto(created);
+
+            await _repo.AddCategoriesAsync(created.ArticleId, dto.CategoryIds);
+            
+            var full = await _repo.GetByIdAsync(created.ArticleId);
+
+            if (full == null)
+            {
+                throw new Exception("Error al recuperar el artículo recién creado.");
+            }
+
+            return ToResponseDto(full);
         }
 
         public async Task<ArticleResponseDto?> UpdateAsync(int id, ArticleUpdateDto dto, string updatedBy)

@@ -25,6 +25,18 @@ namespace CMSVinculacion.Infrastructure.Repositories
             return await query.FirstOrDefaultAsync();
         }
 
+        public async Task AddCategoriesAsync(int articleId, List<int> categoryIds)
+        {
+            var relations = categoryIds.Select(cid => new ArticleCategory
+            {
+                ArticleId = articleId,
+                CategoryId = cid
+            });
+
+            _context.ArticleCategories.AddRange(relations);
+            await _context.SaveChangesAsync();
+        }
+
         public async Task<(IEnumerable<Articles> Items, int Total)> GetPublishedPagedAsync(
             int page, int pageSize, int? categoryId = null)
         {
