@@ -16,6 +16,8 @@ namespace CMSVinculacion.Domain.Entities.Contenido
         [MaxLength(350)]
         public string Slug { get; set; } = string.Empty;
 
+        public string? BlocksJson { get; set; }
+
         public string ContentHtml { get; set; } = string.Empty;
 
         [MaxLength(500)]

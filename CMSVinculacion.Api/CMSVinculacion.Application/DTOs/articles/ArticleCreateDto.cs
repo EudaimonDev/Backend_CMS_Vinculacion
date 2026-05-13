@@ -24,6 +24,9 @@ namespace CMSVinculacion.Application.DTOs.articles
         public int ReadingTime { get; set; } = 1;
 
         public bool Featured { get; set; } = false;
+        
+        public string? BlocksJson { get; set; }
+
 
         public List<int> CategoryIds { get; set; } = new();
     }

@@ -8,5 +8,7 @@ namespace CMSVinculacion.Application.Interfaces
         Task<MediaResponseDto> UploadAsync(IFormFile file, int? articleId, string uploadedBy);
         Task<IEnumerable<MediaResponseDto>> GetAllAsync(int page, int pageSize);
         Task<(byte[] Data, string ContentType)?> GetThumbnailAsync(int id);
+
+        Task<bool> DeleteAsync(int id, string deletedBy);
     }
 }

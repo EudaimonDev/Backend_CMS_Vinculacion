@@ -16,10 +16,8 @@ namespace CMSVinculacion.Infrastructure.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public async Task<Visitors?> ObtenerPorTokenAsync(string token)
-        {
-            return await _context.Visitors
+        public async Task<Visitors?> ObtenerPorTokenAsync(string token) =>
+            await _context.Visitors
                 .FirstOrDefaultAsync(v => v.CookieToken == token && v.IsActive);
-        }
     }
 }

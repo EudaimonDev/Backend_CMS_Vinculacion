@@ -10,45 +10,27 @@ namespace CMSVinculacion.Application.Services
     {
         private readonly IGatekeeperRepository _repo;
 
-        public GatekeeperService(IGatekeeperRepository repo)
-        {
-            _repo = repo;
-        }
+        public GatekeeperService(IGatekeeperRepository repo) => _repo = repo;
 
         public async Task<GatekeeperResponseDto> RegistrarVisitanteAsync(
             GatekeeperRequestDto request, string ipAddress)
         {
-            var nombre = SanitizarTexto(request.Nombre);
-            var email = SanitizarTexto(request.Email).ToLower();
-            var institucion = SanitizarTexto(request.Institucion);
-
-            if (string.IsNullOrWhiteSpace(nombre) ||
-                string.IsNullOrWhiteSpace(email) ||
-                string.IsNullOrWhiteSpace(institucion))
+            if (request.Edad <= 0 || string.IsNullOrWhiteSpace(request.Sexo))
             {
                 return new GatekeeperResponseDto
                 {
                     Exito = false,
-                    Mensaje = "Todos los campos son obligatorios."
+                    Mensaje = "Edad y sexo son obligatorios."
                 };
             }
 
-            if (!email.Contains('@'))
-            {
-                return new GatekeeperResponseDto
-                {
-                    Exito = false,
-                    Mensaje = "El email ingresado no es válido."
-                };
-            }
-
-            var token = GenerarToken(email, ipAddress);
+            var token = GenerarToken(ipAddress);
 
             var visitante = new Visitors
             {
-                FullName = nombre,
-                Email = email,
-                Institution = institucion,
+                Nombres = request.Nombres?.Trim(),
+                Edad = request.Edad,
+                Sexo = request.Sexo.Trim(),
                 IPAddress = ipAddress,
                 CookieToken = token,
                 CreatedAt = DateTime.UtcNow,
@@ -61,7 +43,13 @@ namespace CMSVinculacion.Application.Services
             {
                 Exito = true,
                 Mensaje = "Registro exitoso. Bienvenido.",
-                Token = token
+                Token = token,
+                ExpiresIn = 2592000,
+                Visitor = new GatekeeperVisitorDto
+                {
+                    Id = visitante.VisitorId.ToString(),
+                    Nombres = visitante.Nombres ?? "Visitante"
+                }
             };
         }
 
@@ -80,19 +68,22 @@ namespace CMSVinculacion.Application.Services
             {
                 Exito = true,
                 Mensaje = "Token válido.",
-                Token = token
+                Token = token,
+                ExpiresIn = 2592000,
+                Visitor = new GatekeeperVisitorDto
+                {
+                    Id = visitante.VisitorId.ToString(),
+                    Nombres = visitante.Nombres ?? "Visitante"
+                }
             };
         }
 
-        private static string GenerarToken(string email, string ip)
+        private static string GenerarToken(string ip)
         {
-            var raw = $"{email}:{ip}:{Guid.NewGuid()}:{DateTime.UtcNow.Ticks}";
+            var raw = $"{ip}:{Guid.NewGuid()}:{DateTime.UtcNow.Ticks}";
             var bytes = SHA256.HashData(Encoding.UTF8.GetBytes(raw));
             return Convert.ToBase64String(bytes)
                 .Replace("+", "-").Replace("/", "_").Replace("=", "");
         }
-
-        private static string SanitizarTexto(string input) =>
-            System.Net.WebUtility.HtmlEncode(input.Trim());
     }
 }

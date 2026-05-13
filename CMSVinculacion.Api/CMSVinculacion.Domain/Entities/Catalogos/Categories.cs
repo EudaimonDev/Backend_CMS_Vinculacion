@@ -20,6 +20,8 @@ namespace CMSVinculacion.Domain.Entities.Catalogos
         [MaxLength(300)]
         public string? Description { get; set; }
 
+        [MaxLength(2000)]
+        public string? ImageUrl { get; set; }
         public bool IsPublicVisible { get; set; } = true;
 
         // Relación N:M con Articles via tabla intermedia

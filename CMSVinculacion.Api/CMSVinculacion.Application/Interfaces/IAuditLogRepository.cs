@@ -10,5 +10,6 @@ namespace CMSVinculacion.Application.Interfaces
     public interface IAuditLogRepository
     {
         Task AddAsync(AuditLog log);
+        Task<IEnumerable<AuditLog>> GetRecentAsync(int count = 10);
     }
 }

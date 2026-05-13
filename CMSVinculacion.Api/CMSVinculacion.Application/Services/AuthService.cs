@@ -14,8 +14,6 @@ namespace CMSVinculacion.Application.Services
         private readonly IUserRepository _userRepo;
         private readonly IConfiguration _config;
 
-        private const int AccessTokenMinutes = 60;               
-        private const int RefreshSlidingMinutes = 30;                
         public AuthService(IUserRepository userRepo, IConfiguration config)
         {
             _userRepo = userRepo;
@@ -27,102 +25,92 @@ namespace CMSVinculacion.Application.Services
             var user = await _userRepo.GetByEmailAsync(request.Email);
 
             if (user is null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
-                return new LoginResponseDto { Exito = false, Mensaje = "Credenciales inválidas." };
+                return new LoginResponseDto
+                {
+                    Exito = false,
+                    Mensaje = "Credenciales inválidas."
+                };
 
-            var accessToken = GenerateAccessToken(user.UserId, user.Email, user.Role?.RoleName ?? "Editor");
+            var accessToken = GenerateAccessToken(user.UserId, user.Email,
+                                   user.Username, user.Role?.RoleName ?? "editor");
             var refreshToken = GenerateRefreshToken();
-
-            var now = DateTime.UtcNow;
-
-            user.LastLogin = now;
-
-            var refreshExpiry = now.AddMinutes(RefreshSlidingMinutes);
+            var expiration = DateTime.UtcNow.AddHours(1);
 
             await _userRepo.UpdateRefreshTokenAsync(
-                user.UserId,
-                refreshToken,
-                refreshExpiry
-            );
+                user.UserId, refreshToken, DateTime.UtcNow.AddDays(7));
 
             return new LoginResponseDto
             {
                 Exito = true,
                 Mensaje = "Login exitoso.",
-                AccessToken = accessToken,
+                Token = accessToken,              // "token" que espera el front
                 RefreshToken = refreshToken,
-                Expiration = now.AddMinutes(AccessTokenMinutes)
+                Expiration = expiration,
+                User = new AuthUserDto            // "user" que espera el front
+                {
+                    Id = user.UserId,
+                    Name = user.Username,
+                    Email = user.Email,
+                    Role = user.Role?.RoleName?.ToLower() ?? "editor"
+                }
             };
         }
 
         public async Task<LoginResponseDto> RefreshTokenAsync(string refreshToken)
         {
-            if (string.IsNullOrWhiteSpace(refreshToken))
-                return new LoginResponseDto { Exito = false, Mensaje = "Refresh token requerido." };
-
             var user = await _userRepo.GetByRefreshTokenAsync(refreshToken);
+            if (user is null || user.RefreshTokenExpiry < DateTime.UtcNow)
+                return new LoginResponseDto
+                {
+                    Exito = false,
+                    Mensaje = "Refresh token inválido o expirado."
+                };
 
-            if (user is null)
-                return new LoginResponseDto { Exito = false, Mensaje = "Refresh token inválido." };
-
-            var now = DateTime.UtcNow;
-
-            // inactividad (30 min)
-            if (user.RefreshTokenExpiry < now)
-                return new LoginResponseDto { Exito = false, Mensaje = $"Sesión expirada por inactividad ({RefreshSlidingMinutes} min)." };
-
-            // máximo 7 días desde login
-            if (!user.LastLogin.HasValue || now > user.LastLogin.Value.AddDays(7))
-                return new LoginResponseDto { Exito = false, Mensaje = "Sesión expirada (máximo 7 días)." };
-
-            // generar nuevos tokens
-            var newAccessToken = GenerateAccessToken(
-                user.UserId,
-                user.Email,
-                user.Role?.RoleName ?? "Editor"
-            );
-
-            var newRefreshToken = GenerateRefreshToken();
-
-            // actualizar actividad
-            user.LastLogin = now;
-
-            var newExpiry = now.AddMinutes(RefreshSlidingMinutes);
+            var newAccess = GenerateAccessToken(user.UserId, user.Email,
+                                 user.Username, user.Role?.RoleName ?? "editor");
+            var newRefresh = GenerateRefreshToken();
 
             await _userRepo.UpdateRefreshTokenAsync(
-                user.UserId,
-                newRefreshToken,
-                newExpiry
-            );
+                user.UserId, newRefresh, DateTime.UtcNow.AddDays(7));
 
             return new LoginResponseDto
             {
                 Exito = true,
                 Mensaje = "Token renovado.",
-                AccessToken = newAccessToken,
-                RefreshToken = newRefreshToken,
-                Expiration = now.AddMinutes(AccessTokenMinutes)
+                Token = newAccess,
+                RefreshToken = newRefresh,
+                Expiration = DateTime.UtcNow.AddHours(1),
+                User = new AuthUserDto
+                {
+                    Id = user.UserId,
+                    Name = user.Username,
+                    Email = user.Email,
+                    Role = user.Role?.RoleName?.ToLower() ?? "editor"
+                }
             };
         }
-
 
         public async Task LogoutAsync(string userId)
         {
             if (int.TryParse(userId, out var id))
-                await _userRepo.UpdateRefreshTokenAsync(id, string.Empty, DateTime.UtcNow);
+                await _userRepo.UpdateRefreshTokenAsync(id, string.Empty, DateTime.MinValue);
         }
 
-        private string GenerateAccessToken(int userId, string email, string role)
+        private string GenerateAccessToken(int userId, string email,
+            string username, string role)
         {
             var key = new SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes(_config["Jwt:Key"]
                     ?? throw new InvalidOperationException("Jwt:Key no configurado.")));
+
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
             var claims = new[]
             {
-                new Claim("userId", userId.ToString()),
-                new Claim("email", email),
-                new Claim(ClaimTypes.Role, role)
+                new Claim("userId",             userId.ToString()),
+                new Claim("email",              email),
+                new Claim(ClaimTypes.Role,      role),
+                new Claim(ClaimTypes.Name,      username)
             };
 
             var token = new JwtSecurityToken(

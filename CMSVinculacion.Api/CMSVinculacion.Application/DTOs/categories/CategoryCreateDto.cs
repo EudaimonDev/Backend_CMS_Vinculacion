@@ -11,5 +11,8 @@ namespace CMSVinculacion.Application.DTOs.categories
         [MaxLength(300)]
         public string? Description { get; set; }
         public bool IsPublicVisible { get; set; } = true;
+
+        [MaxLength(500)]
+        public string? ImageUrl { get; set; }
     }
 }

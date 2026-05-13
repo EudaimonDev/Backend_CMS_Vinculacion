@@ -25,6 +25,8 @@ namespace CMSVinculacion.Application.DTOs.articles
 
         public bool Featured { get; set; } = false;
 
+        public string? BlocksJson { get; set; }
+
         public List<int> CategoryIds { get; set; } = new();
     }
 }

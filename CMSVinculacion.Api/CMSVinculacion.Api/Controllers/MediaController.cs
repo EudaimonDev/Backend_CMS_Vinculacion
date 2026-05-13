@@ -41,5 +41,15 @@ namespace CMSVinculacion.Api.Controllers
             if (result is null) return NotFound();
             return File(result.Value.Data, result.Value.ContentType);
         }
+
+        [HttpDelete("admin/{id:int}")]
+        [Authorize(Policy = "AdminOrEditor")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var deletedBy = User.FindFirst("email")?.Value ?? "unknown";
+            var result = await _service.DeleteAsync(id, deletedBy);
+            if (!result) return NotFound();
+            return NoContent();
+        }
     }
 }
