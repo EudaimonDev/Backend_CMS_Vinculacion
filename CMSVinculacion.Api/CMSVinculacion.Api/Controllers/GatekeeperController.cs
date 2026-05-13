@@ -2,6 +2,7 @@
 using CMSVinculacion.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
+
 namespace CMSVinculacion.Api.Controllers
 {
     [ApiController]
@@ -10,54 +11,42 @@ namespace CMSVinculacion.Api.Controllers
     {
         private readonly IGatekeeperService _service;
 
-        public GatekeeperController(IGatekeeperService service)
-        {
-            _service = service;
-        }
+        public GatekeeperController(IGatekeeperService service) => _service = service;
 
-        /// <summary>Registra un nuevo visitante y emite su token de acceso.</summary>
+        /// <summary>Registrar visitante público.</summary>
         [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] GatekeeperRequestDto request)
+        public async Task<IActionResult> Register([FromBody] GatekeeperRequestDto dto)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+            if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            var ip = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
-            var resultado = await _service.RegistrarVisitanteAsync(request, ip);
+            var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+            var result = await _service.RegistrarVisitanteAsync(dto, ipAddress);
 
-            if (!resultado.Exito)
-                return BadRequest(resultado);
+            // Si el correo ya existe retornar 409 para que el front lo maneje
+            if (!result.Exito && result.Visitor is null)
+                return BadRequest(new { message = result.Mensaje });
 
-            return Ok(resultado);
+            if (!result.Exito && result.Visitor is not null)
+                return Conflict(new
+                {
+                    message = result.Mensaje,
+                    token = result.Token,
+                    expiresIn = result.ExpiresIn,
+                    visitor = result.Visitor
+                });
+
+            return Ok(result);
         }
 
-        /// <summary>Valida si un token sigue siendo vigente.</summary>
+        /// <summary>Validar token de visitante.</summary>
         [HttpGet("validate")]
         public async Task<IActionResult> Validate([FromQuery] string token)
         {
             if (string.IsNullOrWhiteSpace(token))
-                return BadRequest("Token requerido.");
+                return BadRequest(new { message = "Token requerido." });
 
-            var resultado = await _service.ValidarTokenAsync(token);
-
-            if (!resultado.Exito)
-                return Unauthorized(resultado);
-
-            return Ok(resultado);
-        }
-
-        [HttpGet("check")]
-        public async Task<IActionResult> Check([FromQuery] string token)
-        {
-            if (string.IsNullOrWhiteSpace(token))
-                return Ok(new { registered = false });
-
-            var visitante = await _service.ValidarTokenAsync(token);
-
-            return Ok(new
-            {
-                registered = visitante.Exito
-            });
+            var result = await _service.ValidarTokenAsync(token);
+            return result.Exito ? Ok(result) : Unauthorized(result);
         }
     }
 }

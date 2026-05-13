@@ -1,4 +1,6 @@
-﻿namespace CMSVinculacion.Application.DTOs.categories
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace CMSVinculacion.Application.DTOs.categories
 {
     public class CategoryResponseDto
     {
@@ -8,5 +10,7 @@
         public string? Description { get; set; }
         public bool IsPublicVisible { get; set; }
         public int ArticleCount { get; set; }
+
+        public string? ImageUrl { get; set; }
     }
 }

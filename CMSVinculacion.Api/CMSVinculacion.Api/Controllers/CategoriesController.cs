@@ -46,6 +46,7 @@ namespace CMSVinculacion.Api.Controllers
         [Authorize(Policy = "AdminOrEditor")]
         public async Task<IActionResult> Update(int id, [FromBody] CategoryUpdateDto dto)
         {
+            Console.WriteLine($"ImageUrl recibido: {dto.ImageUrl}"); // ← temporal
             if (!ModelState.IsValid) return BadRequest(ModelState);
             try
             {

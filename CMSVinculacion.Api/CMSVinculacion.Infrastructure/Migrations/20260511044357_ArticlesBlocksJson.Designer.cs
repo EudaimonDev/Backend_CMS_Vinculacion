@@ -4,6 +4,7 @@ using CMSVinculacion.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CMSVinculacion.Infrastructure.Migrations
 {
     [DbContext(typeof(SqlDbContext))]
-    partial class SqlDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260511044357_ArticlesBlocksJson")]
+    partial class ArticlesBlocksJson
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -131,9 +134,6 @@ namespace CMSVinculacion.Infrastructure.Migrations
 
                     b.Property<int?>("AuthorId")
                         .HasColumnType("int");
-
-                    b.Property<string>("BlocksJson")
-                        .HasColumnType("varchar(max)");
 
                     b.Property<string>("ContentHtml")
                         .IsRequired()

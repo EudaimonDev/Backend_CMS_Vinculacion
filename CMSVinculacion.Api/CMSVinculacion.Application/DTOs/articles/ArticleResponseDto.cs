@@ -19,6 +19,8 @@
         public DateTime? PublishedAt { get; set; }
         public int ViewCount { get; set; }
         public DateTime CreatedAt { get; set; }
+
+        public string? BlocksJson { get; set; }
         public DateTime? UpdatedAt { get; set; }
     }
 }

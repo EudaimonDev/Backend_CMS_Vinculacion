@@ -32,6 +32,13 @@ namespace CMSVinculacion.Api.Controllers
             return result.Exito ? Ok(result) : Unauthorized(result);
         }
 
+        /// <summary>Generar hash de contraseña — solo para setup inicial.</summary>
+        [HttpGet("hash")]
+        public IActionResult GetHash([FromQuery] string password)
+        {
+            return Ok(new { hash = BCrypt.Net.BCrypt.HashPassword(password) });
+        }
+
         /// <summary>Cierra sesión invalidando el refresh token.</summary>
         [HttpPost("logout")]
         [Authorize]

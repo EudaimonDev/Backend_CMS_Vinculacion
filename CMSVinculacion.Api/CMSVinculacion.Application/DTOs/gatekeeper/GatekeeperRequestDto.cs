@@ -1,15 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace CMSVinculacion.Application.DTOs.gatekeeper
 {
     public class GatekeeperRequestDto
     {
-        public string Nombre { get; set; } = string.Empty;
-        public string Email { get; set; } = string.Empty;
-        public string Institucion { get; set; } = string.Empty;
+        [MaxLength(200)]
+        public string? Nombres { get; set; }
+
+        [Required]
+        [Range(1, 120)]
+        public int Edad { get; set; }
+
+        [Required, MaxLength(20)]
+        public string Sexo { get; set; } = string.Empty;
     }
 }

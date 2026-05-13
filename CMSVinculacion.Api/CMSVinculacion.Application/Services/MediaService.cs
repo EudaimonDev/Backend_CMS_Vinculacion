@@ -73,5 +73,20 @@ namespace CMSVinculacion.Application.Services
             UploadedAt = m.UploadedAt,
             ArticleId = m.ArticleId
         };
+
+        public async Task<bool> DeleteAsync(int id, string deletedBy)
+        {
+            var media = await _repo.GetByIdAsync(id);
+            if (media is null) return false;
+
+            // Eliminar archivo físico
+            var fullPath = Path.Combine(_uploadsPath, Path.GetFileName(media.FilePath));
+            if (File.Exists(fullPath))
+                File.Delete(fullPath);
+
+            // Eliminar registro de BD
+            await _repo.DeleteAsync(id);
+            return true;
+        }
     }
 }

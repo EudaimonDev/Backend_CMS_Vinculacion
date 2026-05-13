@@ -31,6 +31,7 @@ namespace CMSVinculacion.Application.Services
                 Slug = slug,
                 Description = dto.Description,
                 IsPublicVisible = dto.IsPublicVisible,
+                ImageUrl = dto.ImageUrl,
                 CreatedAt = DateTime.UtcNow
             };
             var created = await _repo.CreateAsync(category);
@@ -50,6 +51,7 @@ namespace CMSVinculacion.Application.Services
             cat.Slug = slug;
             cat.Description = dto.Description;
             cat.IsPublicVisible = dto.IsPublicVisible;
+            cat.ImageUrl = dto.ImageUrl;
             cat.UpdatedAt = DateTime.UtcNow;
 
             await _repo.UpdateAsync(cat);
@@ -79,6 +81,7 @@ namespace CMSVinculacion.Application.Services
             Slug = c.Slug,
             Description = c.Description,
             IsPublicVisible = c.IsPublicVisible,
+            ImageUrl = c.ImageUrl,
             ArticleCount = c.ArticleCategories?.Count ?? 0
         };
     }
