@@ -10,5 +10,7 @@ namespace CMSVinculacion.Application.Interfaces
         Task<(byte[] Data, string ContentType)?> GetThumbnailAsync(int id);
 
         Task<bool> DeleteAsync(int id, string deletedBy);
+
+        Task<IEnumerable<MediaResponseDto>> UploadSlidesAsync(IFormFile file, int? articleId, string uploadedBy);
     }
 }
