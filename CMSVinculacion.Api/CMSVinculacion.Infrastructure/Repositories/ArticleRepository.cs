@@ -134,5 +134,35 @@ namespace CMSVinculacion.Infrastructure.Repositories
             await _context.ArticleCategories.AddRangeAsync(newCategories);
             await _context.SaveChangesAsync();
         }
+
+        public async Task<bool> SlugExistsAsync(string slug, int? excludeArticleId = null) =>
+            await _context.Articles.AnyAsync(a =>
+                a.DeletedAt == null &&
+                a.Slug == slug &&
+                (!excludeArticleId.HasValue || a.ArticleId != excludeArticleId.Value));
+
+        public async Task<int> CountSlugVariantsAsync(string baseSlug, int? excludeArticleId = null)
+        {
+            var query = _context.Articles
+                .AsNoTracking()
+                .Where(a => a.DeletedAt == null &&
+                            (a.Slug == baseSlug || a.Slug.StartsWith(baseSlug + "-")));
+
+            if (excludeArticleId.HasValue)
+                query = query.Where(a => a.ArticleId != excludeArticleId.Value);
+
+            var slugs = await query.Select(a => a.Slug).ToListAsync();
+
+            return slugs.Count(s => s == baseSlug || HasNumericSuffix(baseSlug, s));
+        }
+
+        private static bool HasNumericSuffix(string baseSlug, string slug)
+        {
+            if (!slug.StartsWith(baseSlug + "-", StringComparison.Ordinal))
+                return false;
+
+            var suffix = slug[(baseSlug.Length + 1)..];
+            return suffix.Length > 0 && suffix.All(char.IsDigit);
+        }
     }
 }

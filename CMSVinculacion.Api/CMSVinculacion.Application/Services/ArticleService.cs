@@ -112,10 +112,12 @@ namespace CMSVinculacion.Application.Services
 
         public async Task<ArticleResponseDto> CreateAsync(ArticleCreateDto dto, int authorId)
         {
+            var slug = await ResolveUniqueSlugAsync(GenerateSlug(dto.Title));
+
             var article = new Articles
             {
                 Title = dto.Title,
-                Slug = dto.Slug ?? GenerateSlug(dto.Title),
+                Slug = slug,
                 Emoji = dto.Emoji ?? string.Empty,
                 Excerpt = dto.Excerpt,
                 ReadingTime = dto.ReadingTime,
@@ -140,7 +142,9 @@ namespace CMSVinculacion.Application.Services
             if (article is null) return null;
 
             article.Title = dto.Title;
-            article.Slug = dto.Slug ?? GenerateSlug(dto.Title);
+            article.Slug = !string.IsNullOrWhiteSpace(dto.Slug)
+                ? await ResolveUniqueSlugAsync(NormalizeSlug(dto.Slug), id)
+                : article.Slug;
             article.Emoji = dto.Emoji ?? string.Empty;
             article.Excerpt = dto.Excerpt;
             article.ReadingTime = dto.ReadingTime;
@@ -178,6 +182,31 @@ namespace CMSVinculacion.Application.Services
             title.ToLower().Replace(" ", "-")
                 .Replace("á", "a").Replace("é", "e").Replace("í", "i")
                 .Replace("ó", "o").Replace("ú", "u").Replace("ñ", "n");
+
+        private static string NormalizeSlug(string slug) =>
+            slug.Trim().Trim('/').ToLowerInvariant();
+
+        private async Task<string> ResolveUniqueSlugAsync(string baseSlug, int? excludeArticleId = null)
+        {
+            baseSlug = NormalizeSlug(baseSlug);
+            if (string.IsNullOrWhiteSpace(baseSlug))
+                baseSlug = "pagina";
+
+            var count = await _repo.CountSlugVariantsAsync(baseSlug, excludeArticleId);
+            if (count == 0)
+                return baseSlug;
+
+            var suffix = count + 1;
+            var candidate = $"{baseSlug}-{suffix}";
+
+            while (await _repo.SlugExistsAsync(candidate, excludeArticleId))
+            {
+                suffix++;
+                candidate = $"{baseSlug}-{suffix}";
+            }
+
+            return candidate;
+        }
 
         private static ArticleListDto ToListDto(Articles a) => new()
         {

@@ -1,5 +1,7 @@
-﻿using CMSVinculacion.Application.DTOs.auth;
+﻿using Azure.Core;
+using CMSVinculacion.Application.DTOs.auth;
 using CMSVinculacion.Application.Interfaces;
+using Microsoft.CognitiveServices.Speech.Transcription;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -22,38 +24,54 @@ namespace CMSVinculacion.Application.Services
 
         public async Task<LoginResponseDto> LoginAsync(LoginRequestDto request)
         {
-            var user = await _userRepo.GetByEmailAsync(request.Email);
+            try
+            {
+                var user = await _userRepo.GetByEmailAsync(request.Email);
 
-            if (user is null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
+                if (user is null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
+                    return new LoginResponseDto
+                    {
+                        Exito = false,
+                        Mensaje = "Credenciales inválidas."
+                    };
+
+                var accessToken = GenerateAccessToken(user.UserId, user.Email,
+                                       user.Username, user.Role?.RoleName ?? "editor");
+                var refreshToken = GenerateRefreshToken();
+                var expiration = DateTime.UtcNow.AddHours(1);
+
+                await _userRepo.UpdateRefreshTokenAsync(
+                    user.UserId, refreshToken, DateTime.UtcNow.AddDays(7));
+
+                return new LoginResponseDto
+                {
+                    Exito = true,
+                    Mensaje = "Login exitoso.",
+                    Token = accessToken,              // "token" que espera el front
+                    RefreshToken = refreshToken,
+                    Expiration = expiration,
+                    User = new AuthUserDto            // "user" que espera el front
+                    {
+                        Id = user.UserId,
+                        Name = user.Username,
+                        Email = user.Email,
+                        Role = user.Role?.RoleName?.ToLower() ?? "editor"
+                    }
+                };
+            }
+            catch(Exception ex)
+            {
                 return new LoginResponseDto
                 {
                     Exito = false,
-                    Mensaje = "Credenciales inválidas."
+                    Mensaje = "Login fallido. " + ex.Message +". "+ ex.InnerException?.Message,
+                    Token = null,              // "token" que espera el front
+                    RefreshToken = null,
+                    Expiration = null,
+                    User = null
                 };
-
-            var accessToken = GenerateAccessToken(user.UserId, user.Email,
-                                   user.Username, user.Role?.RoleName ?? "editor");
-            var refreshToken = GenerateRefreshToken();
-            var expiration = DateTime.UtcNow.AddHours(1);
-
-            await _userRepo.UpdateRefreshTokenAsync(
-                user.UserId, refreshToken, DateTime.UtcNow.AddDays(7));
-
-            return new LoginResponseDto
-            {
-                Exito = true,
-                Mensaje = "Login exitoso.",
-                Token = accessToken,              // "token" que espera el front
-                RefreshToken = refreshToken,
-                Expiration = expiration,
-                User = new AuthUserDto            // "user" que espera el front
-                {
-                    Id = user.UserId,
-                    Name = user.Username,
-                    Email = user.Email,
-                    Role = user.Role?.RoleName?.ToLower() ?? "editor"
-                }
-            };
+            }
+            
         }
 
         public async Task<LoginResponseDto> RefreshTokenAsync(string refreshToken)

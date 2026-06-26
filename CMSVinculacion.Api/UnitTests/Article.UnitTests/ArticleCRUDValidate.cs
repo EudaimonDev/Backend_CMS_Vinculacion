@@ -90,6 +90,8 @@ namespace Article.UnitTests
             };
 
             // Le decimos al mock que simplemente devuelva el mismo artículo que recibe cuando llamen a CreateAsync
+            _mockRepo.Setup(repo => repo.CountSlugVariantsAsync(It.IsAny<string>(), null))
+                     .ReturnsAsync(0);
             _mockRepo.Setup(repo => repo.CreateAsync(It.IsAny<Articles>()))
                      .ReturnsAsync((Articles a) => a);
 
@@ -104,6 +106,29 @@ namespace Article.UnitTests
             // Verificamos que el repositorio realmente fue llamado exactamente 1 vez
             _mockRepo.Verify(repo => repo.CreateAsync(It.IsAny<Articles>()), Times.Once);
         }
+
+        [Fact]
+        public async Task CreateAsync_AppendsCounter_WhenSlugVariantsExist()
+        {
+            var dto = new ArticleCreateDto
+            {
+                Title = "Cromosomas",
+                ContentHtml = "<p>Contenido</p>",
+                CategoryIds = new List<int>()
+            };
+
+            _mockRepo.Setup(repo => repo.CountSlugVariantsAsync("cromosomas", null))
+                     .ReturnsAsync(3);
+            _mockRepo.Setup(repo => repo.SlugExistsAsync("cromosomas-4", null))
+                     .ReturnsAsync(false);
+            _mockRepo.Setup(repo => repo.CreateAsync(It.IsAny<Articles>()))
+                     .ReturnsAsync((Articles a) => a);
+
+            var result = await _service.CreateAsync(dto, 1);
+
+            Assert.Equal("cromosomas-4", result.Slug);
+        }
+
         // Prueba de update
         [Fact]
         public async Task UpdateAsync_ReturnsUpdatedDto_WhenArticleExists()

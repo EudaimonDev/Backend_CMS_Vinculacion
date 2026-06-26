@@ -14,5 +14,7 @@ namespace CMSVinculacion.Application.Interfaces
         Task SoftDeleteAsync(int id, string deletedBy);
         Task UpdateStatusAsync(int id, int statusId, string updatedBy);
         Task UpdateCategoriesAsync(int articleId, List<int> categoryIds);
+        Task<bool> SlugExistsAsync(string slug, int? excludeArticleId = null);
+        Task<int> CountSlugVariantsAsync(string baseSlug, int? excludeArticleId = null);
     }
 }
