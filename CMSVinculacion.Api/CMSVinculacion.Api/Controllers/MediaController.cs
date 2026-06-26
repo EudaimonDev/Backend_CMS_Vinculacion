@@ -51,5 +51,25 @@ namespace CMSVinculacion.Api.Controllers
             if (!result) return NotFound();
             return NoContent();
         }
+
+        [HttpPost("admin/upload-slides")]
+        [Authorize(Policy = "AdminOrEditor")]
+        [RequestSizeLimit(50_000_000)]
+        public async Task<IActionResult> UploadSlides(IFormFile file, [FromQuery] int? articleId)
+        {
+            if (file is null || file.Length == 0)
+                return BadRequest("Archivo requerido.");
+
+            var uploadedBy = User.FindFirst("email")?.Value ?? "unknown";
+            try
+            {
+                var results = await _service.UploadSlidesAsync(file, articleId, uploadedBy);
+                return Ok(results);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
     }
 }
