@@ -34,6 +34,12 @@ namespace CMSVinculacion.Api.Extensions
                 options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
             });
 
+            services.AddHttpClient("CanvaResolver", client =>
+            {
+                client.Timeout = TimeSpan.FromSeconds(20);
+                client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (compatible; CMSVinculacion/1.0)");
+            });
+
             // APPLICATION DB CONTEXT
             services.DependencyEF(Configuration);
 

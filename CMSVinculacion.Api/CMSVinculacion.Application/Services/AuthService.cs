@@ -38,7 +38,7 @@ namespace CMSVinculacion.Application.Services
                 var accessToken = GenerateAccessToken(user.UserId, user.Email,
                                        user.Username, user.Role?.RoleName ?? "editor");
                 var refreshToken = GenerateRefreshToken();
-                var expiration = DateTime.UtcNow.AddHours(1);
+                var expiration = DateTime.UtcNow.AddDays(3);
 
                 await _userRepo.UpdateRefreshTokenAsync(
                     user.UserId, refreshToken, DateTime.UtcNow.AddDays(7));
@@ -97,7 +97,7 @@ namespace CMSVinculacion.Application.Services
                 Mensaje = "Token renovado.",
                 Token = newAccess,
                 RefreshToken = newRefresh,
-                Expiration = DateTime.UtcNow.AddHours(1),
+                Expiration = DateTime.UtcNow.AddDays(3),
                 User = new AuthUserDto
                 {
                     Id = user.UserId,
@@ -135,7 +135,7 @@ namespace CMSVinculacion.Application.Services
                 issuer: _config["Jwt:Issuer"],
                 audience: _config["Jwt:Audience"],
                 claims: claims,
-                expires: DateTime.UtcNow.AddHours(1),
+                expires: DateTime.UtcNow.AddDays(3),
                 signingCredentials: creds);
 
             return new JwtSecurityTokenHandler().WriteToken(token);

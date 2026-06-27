@@ -2,6 +2,7 @@
 using CMSVinculacion.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.RegularExpressions;
 
 namespace CMSVinculacion.Api.Controllers
 {
@@ -106,6 +107,81 @@ namespace CMSVinculacion.Api.Controllers
             var deletedBy = User.FindFirst("email")?.Value ?? "unknown";
             var ok = await _service.DeleteAsync(id, deletedBy);
             return ok ? NoContent() : NotFound();
+        }
+
+        /// <summary>Resuelve enlaces Canva (incluye canva.link) al ID embebible.</summary>
+        [HttpGet("canva/resolve")]
+        [AllowAnonymous]
+        public async Task<IActionResult> ResolveCanvaUrl(
+            [FromQuery] string url,
+            IHttpClientFactory httpClientFactory)
+        {
+            if (string.IsNullOrWhiteSpace(url))
+                return BadRequest(new { message = "URL requerida" });
+
+            var trimmed = url.Trim();
+            var parsed = ParseCanvaUrl(trimmed);
+            if (parsed is not null)
+                return Ok(BuildCanvaResolveResponse(parsed.Value.designId, parsed.Value.shareToken));
+
+            if (!Uri.TryCreate(trimmed, UriKind.Absolute, out var uri))
+                return BadRequest(new { message = "URL no válida" });
+
+            var host = uri.Host.ToLowerInvariant();
+            var isCanvaHost = host is "canva.link" or "www.canva.link" || host.EndsWith("canva.com");
+            if (!isCanvaHost)
+                return BadRequest(new { message = "Solo se admiten enlaces de Canva" });
+
+            try
+            {
+                var client = httpClientFactory.CreateClient("CanvaResolver");
+                using var response = await client.GetAsync(uri, HttpCompletionOption.ResponseHeadersRead);
+                var finalUrl = response.RequestMessage?.RequestUri?.ToString() ?? trimmed;
+                parsed = ParseCanvaUrl(finalUrl);
+
+                if (parsed is null && response.Headers.Location is not null)
+                    parsed = ParseCanvaUrl(response.Headers.Location.ToString());
+
+                if (parsed is null)
+                    return BadRequest(new { message = "No se pudo obtener el ID del diseño Canva" });
+
+                return Ok(BuildCanvaResolveResponse(parsed.Value.designId, parsed.Value.shareToken));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = $"Error al resolver enlace Canva: {ex.Message}" });
+            }
+        }
+
+        private static readonly HashSet<string> CanvaPathActions = new(StringComparer.OrdinalIgnoreCase)
+        {
+            "view", "edit", "watch", "present", "embed"
+        };
+
+        private static (string designId, string? shareToken)? ParseCanvaUrl(string url)
+        {
+            var match = Regex.Match(url, @"canva\.com/design/([A-Za-z0-9_-]+)(?:/([^/?#]+))?", RegexOptions.IgnoreCase);
+            if (!match.Success) return null;
+
+            var designId = match.Groups[1].Value;
+            var second = match.Groups[2].Success ? match.Groups[2].Value : null;
+            string? shareToken = null;
+            if (!string.IsNullOrEmpty(second) && !CanvaPathActions.Contains(second))
+                shareToken = second;
+
+            return (designId, shareToken);
+        }
+
+        private static object BuildCanvaResolveResponse(string designId, string? shareToken)
+        {
+            var embedUrl = shareToken is not null
+                ? $"https://www.canva.com/design/{designId}/{shareToken}/view?embed"
+                : $"https://www.canva.com/design/{designId}/view?embed";
+            var viewUrl = shareToken is not null
+                ? $"https://www.canva.com/design/{designId}/{shareToken}/view"
+                : $"https://www.canva.com/design/{designId}/view";
+
+            return new { designId, shareToken, embedUrl, viewUrl };
         }
     }
 }
