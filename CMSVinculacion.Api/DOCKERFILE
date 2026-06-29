@@ -23,4 +23,4 @@ RUN dotnet publish "CMSVinculacion.Api.csproj" -c Release -o /app/publish /p:Use
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "CMSVinculacion.Api.dll"]
+ENTRYPOINT ["dotnet", "CMSVinculacion.Api.dll"] 
