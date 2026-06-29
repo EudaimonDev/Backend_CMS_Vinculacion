@@ -1,0 +1,26 @@
+FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
+WORKDIR /app
+EXPOSE 8080
+
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+WORKDIR /src
+
+# Copia solo el csproj primero para cachear el restore
+COPY ["CMSVinculacion.Api/CMSVinculacion.Api.csproj", "CMSVinculacion.Api/"]
+COPY ["CMSVinculacion.Application/CMSVinculacion.Application.csproj", "CMSVinculacion.Application/"]
+COPY ["CMSVinculacion.Domain/CMSVinculacion.Domain.csproj", "CMSVinculacion.Domain/"]
+COPY ["CMSVinculacion.Infrastructure/CMSVinculacion.Infrastructure.csproj", "CMSVinculacion.Infrastructure/"]
+RUN dotnet restore "CMSVinculacion.Api/CMSVinculacion.Api.csproj"
+
+# Copia el resto del código y compila
+COPY . .
+WORKDIR "/src/CMSVinculacion.Api"
+RUN dotnet build "CMSVinculacion.Api.csproj" -c Release -o /app/build
+
+FROM build AS publish
+RUN dotnet publish "CMSVinculacion.Api.csproj" -c Release -o /app/publish /p:UseAppHost=false
+
+FROM base AS final
+WORKDIR /app
+COPY --from=publish /app/publish .
+ENTRYPOINT ["dotnet", "CMSVinculacion.Api.dll"]
