@@ -10,6 +10,7 @@ namespace CMSVinculacion.Infrastructure
     {
         // CATALOGO
         public DbSet<Categories> Categories { get; set; }
+        public DbSet<SubCategories> SubCategories { get; set; }
 
         // CONTENIDO
         public DbSet<Articles> Articles { get; set; }
@@ -64,6 +65,16 @@ namespace CMSVinculacion.Infrastructure
                 .HasOne(ac => ac.Category)
                 .WithMany(c => c.ArticleCategories)
                 .HasForeignKey(ac => ac.CategoryId);
+
+            modelBuilder.Entity<SubCategories>()
+                .HasOne(s => s.Category)
+                .WithMany(c => c.SubCategories)
+                .HasForeignKey(s => s.CategoryId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<SubCategories>()
+                .HasIndex(s => new { s.CategoryId, s.Slug })
+                .IsUnique();
 
             // MediaFiles -> Article
             modelBuilder.Entity<MediaFiles>()

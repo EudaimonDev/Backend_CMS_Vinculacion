@@ -1,4 +1,3 @@
-﻿using CMSVinculacion.Domain.Entities.Contenido;
 using CMSVinculacion.Domain.Entities.Seguridad;
 using CMSVinculacion.Domain.Enums;
 using System.ComponentModel.DataAnnotations;
@@ -6,11 +5,14 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CMSVinculacion.Domain.Entities.Catalogos
 {
-    [Table(nameof(Categories), Schema = "CAT")]
-    public class Categories : Audit
+    [Table(nameof(SubCategories), Schema = "CAT")]
+    public class SubCategories : Audit
     {
         [Key]
+        public int SubCategoryId { get; set; }
+
         public int CategoryId { get; set; }
+        public Categories? Category { get; set; }
 
         [MaxLength(100)]
         public string Name { get; set; } = string.Empty;
@@ -21,16 +23,6 @@ namespace CMSVinculacion.Domain.Entities.Catalogos
         [MaxLength(300)]
         public string? Description { get; set; }
 
-        [MaxLength(2000)]
-        public string? ImageUrl { get; set; }
-
-        public bool IsPublicVisible { get; set; } = true;
-
         public EnumEstado Estado { get; set; } = EnumEstado.Borrador;
-
-        public ICollection<SubCategories>? SubCategories { get; set; }
-
-        // Relación N:M con Articles via tabla intermedia
-        public ICollection<ArticleCategory>? ArticleCategories { get; set; }
     }
 }

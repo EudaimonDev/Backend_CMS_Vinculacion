@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using CMSVinculacion.Domain.Enums;
+using System.ComponentModel.DataAnnotations;
 
 namespace CMSVinculacion.Application.DTOs.categories
 {
@@ -6,13 +7,17 @@ namespace CMSVinculacion.Application.DTOs.categories
     {
         [Required, MaxLength(100)]
         public string Name { get; set; } = string.Empty;
-        [MaxLength(120)]
-        public string? Slug { get; set; }
+
         [MaxLength(300)]
         public string? Description { get; set; }
+
         public bool IsPublicVisible { get; set; } = true;
 
-        [MaxLength(500)]
+        public EnumEstado Estado { get; set; } = EnumEstado.Borrador;
+
+        [MaxLength(2000)]
         public string? ImageUrl { get; set; }
+
+        public List<SubCategoryDto> SubCategories { get; set; } = new();
     }
 }
