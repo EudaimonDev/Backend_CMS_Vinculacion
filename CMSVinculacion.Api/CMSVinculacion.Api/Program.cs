@@ -21,7 +21,8 @@ builder.WebHost.ConfigureKestrel(serverOptions =>
 });
 
 builder.Services.AddDataProtection();
-
+var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
+builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
 var app = builder.Build();
 
 app.MapGet("/hash", () => BCrypt.Net.BCrypt.HashPassword("1234"));//clavetemporaltesteo
