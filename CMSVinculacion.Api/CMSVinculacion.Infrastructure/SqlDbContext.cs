@@ -76,6 +76,12 @@ namespace CMSVinculacion.Infrastructure
                 .HasIndex(s => new { s.CategoryId, s.Slug })
                 .IsUnique();
 
+            modelBuilder.Entity<Articles>()
+                .HasOne(a => a.SubCategory)
+                .WithMany(s => s.Articles)
+                .HasForeignKey(a => a.SubCategoryId)
+                .OnDelete(DeleteBehavior.SetNull);
+
             // MediaFiles -> Article
             modelBuilder.Entity<MediaFiles>()
                 .HasOne(m => m.Article)

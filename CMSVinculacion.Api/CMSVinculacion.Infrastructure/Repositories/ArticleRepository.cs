@@ -1,7 +1,7 @@
 ﻿using CMSVinculacion.Application.Interfaces;
+using CMSVinculacion.Domain.Entities.Catalogos;
 using CMSVinculacion.Domain.Entities.Contenido;
 using Microsoft.EntityFrameworkCore;
-
 namespace CMSVinculacion.Infrastructure.Repositories
 {
     public class ArticleRepository : IArticleRepository
@@ -15,6 +15,7 @@ namespace CMSVinculacion.Infrastructure.Repositories
             var query = _context.Articles
                 .Include(a => a.Status)
                 .Include(a => a.Author)
+                .Include(a => a.SubCategory)
                 .Include(a => a.ArticleCategories)!.ThenInclude(ac => ac.Category)
                 .Include(a => a.MediaFiles)
                 .Where(a => a.ArticleId == id);
@@ -30,6 +31,7 @@ namespace CMSVinculacion.Infrastructure.Repositories
         {
             var query = _context.Articles
                 .Include(a => a.Status)
+                .Include(a => a.SubCategory)
                 .Include(a => a.ArticleCategories)!.ThenInclude(ac => ac.Category)
                 .Where(a => a.DeletedAt == null && a.StatusId == 2);//correccion menor
 
@@ -48,6 +50,7 @@ namespace CMSVinculacion.Infrastructure.Repositories
 
         public async Task<IEnumerable<Articles>> GetRecentPublishedAsync(int count = 5) =>
             await _context.Articles
+                .Include(a => a.SubCategory)
                 .Include(a => a.ArticleCategories)!.ThenInclude(ac => ac.Category)
                 .Where(a => a.DeletedAt == null && a.Status!.StatusName == "Published")
                 .OrderByDescending(a => a.PublishedAt)
@@ -58,6 +61,7 @@ namespace CMSVinculacion.Infrastructure.Repositories
             await _context.Articles
                 .AsNoTracking()
                 .Include(a => a.ArticleCategories)!.ThenInclude(ac => ac.Category)
+                .Include(a => a.SubCategory)
                 .Where(a => a.DeletedAt == null && a.Status!.StatusName == "Published"
                          && a.FeaturedImage != null)
                 .OrderByDescending(a => a.PublishedAt)
@@ -71,6 +75,7 @@ namespace CMSVinculacion.Infrastructure.Repositories
                 .AsNoTracking()
                 .Include(a => a.Status)
                 .Include(a => a.Author)
+                .Include(a => a.SubCategory)
                 .Include(a => a.ArticleCategories)!.ThenInclude(ac => ac.Category)
                 .Where(a => a.DeletedAt == null);
 
@@ -134,6 +139,10 @@ namespace CMSVinculacion.Infrastructure.Repositories
             await _context.ArticleCategories.AddRangeAsync(newCategories);
             await _context.SaveChangesAsync();
         }
+
+        public async Task<SubCategories?> GetSubCategoryByIdAsync(int subCategoryId) =>
+            await _context.SubCategories
+                .FirstOrDefaultAsync(s => s.SubCategoryId == subCategoryId && s.DeletedAt == null);
 
         public async Task<bool> SlugExistsAsync(string slug, int? excludeArticleId = null) =>
             await _context.Articles.AnyAsync(a =>

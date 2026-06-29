@@ -73,9 +73,16 @@ namespace CMSVinculacion.Api.Controllers
         public async Task<IActionResult> Create([FromBody] ArticleCreateDto dto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
-            var authorId = int.Parse(User.FindFirst("userId")?.Value ?? "0");
-            var created = await _service.CreateAsync(dto, authorId);
-            return CreatedAtAction(nameof(GetAdminById), new { id = created.Id }, created);
+            try
+            {
+                var authorId = int.Parse(User.FindFirst("userId")?.Value ?? "0");
+                var created = await _service.CreateAsync(dto, authorId);
+                return CreatedAtAction(nameof(GetAdminById), new { id = created.Id }, created);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(new { message = ex.Message });
+            }
         }
 
         /// <summary>Editar artículo completo.</summary>
@@ -84,9 +91,16 @@ namespace CMSVinculacion.Api.Controllers
         public async Task<IActionResult> Update(int id, [FromBody] ArticleUpdateDto dto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
-            var updatedBy = User.FindFirst("email")?.Value ?? "unknown";
-            var result = await _service.UpdateAsync(id, dto, updatedBy);
-            return result is null ? NotFound() : Ok(result);
+            try
+            {
+                var updatedBy = User.FindFirst("email")?.Value ?? "unknown";
+                var result = await _service.UpdateAsync(id, dto, updatedBy);
+                return result is null ? NotFound() : Ok(result);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(new { message = ex.Message });
+            }
         }
 
         /// <summary>Cambiar estado borrador ↔ publicado.</summary>

@@ -1,6 +1,7 @@
 ﻿using CMSVinculacion.Application.DTOs.categories;
 using CMSVinculacion.Application.Interfaces;
 using CMSVinculacion.Domain.Entities.Catalogos;
+using CMSVinculacion.Domain.Entities.Contenido;
 using CMSVinculacion.Domain.Enums;
 
 namespace CMSVinculacion.Application.Services
@@ -99,7 +100,7 @@ namespace CMSVinculacion.Application.Services
         public async Task<bool> DeleteAsync(int id)
         {
             if (await _repo.HasArticlesAsync(id))
-                throw new InvalidOperationException("No se puede eliminar una categoría con artículos asociados.");
+                throw new InvalidOperationException("No se puede eliminar una categoría con artículos activos asociados.");
 
             var cat = await _repo.GetByIdAsync(id, includeInactive: true);
             if (cat is null) return false;
@@ -219,7 +220,7 @@ namespace CMSVinculacion.Application.Services
             Estado = c.Estado,
             IsActive = c.IsActive,
             ImageUrl = c.ImageUrl,
-            ArticleCount = c.ArticleCategories?.Count ?? 0,
+            ArticleCount = CountActiveArticles(c),
             SubCategories = c.SubCategories?
                 .Where(s => s.DeletedAt == null)
                 .OrderBy(s => s.Name)
@@ -235,5 +236,11 @@ namespace CMSVinculacion.Application.Services
                 })
                 .ToList() ?? new List<SubCategoryResponseDto>()
         };
+
+        private static int CountActiveArticles(Categories category) =>
+            category.ArticleCategories?.Count(ac => IsActiveArticle(ac.Article)) ?? 0;
+
+        private static bool IsActiveArticle(Articles? article) =>
+            article is not null && article.DeletedAt == null && article.IsActive;
     }
 }

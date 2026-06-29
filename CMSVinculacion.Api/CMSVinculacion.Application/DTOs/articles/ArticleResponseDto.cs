@@ -12,7 +12,11 @@
         public int ReadingTime { get; set; }
         public bool Featured { get; set; }
         public string? Category { get; set; }           // primera categoria (compatibilidad front)
+        public List<int> CategoryIds { get; set; } = new();
         public List<string> Categories { get; set; } = new();
+        public int? SubCategoryId { get; set; }
+        public string? SubCategory { get; set; }
+        public string? SubCategoryName { get; set; }
         public string? StatusName { get; set; }
         public string? AuthorUsername { get; set; }
         public string Date { get; set; } = string.Empty; // formato "8 Mar 2026" igual que el front

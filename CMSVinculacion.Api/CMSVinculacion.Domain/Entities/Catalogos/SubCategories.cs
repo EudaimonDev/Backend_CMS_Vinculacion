@@ -1,5 +1,6 @@
 using CMSVinculacion.Domain.Entities.Seguridad;
 using CMSVinculacion.Domain.Enums;
+using CMSVinculacion.Domain.Entities.Contenido;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -24,5 +25,7 @@ namespace CMSVinculacion.Domain.Entities.Catalogos
         public string? Description { get; set; }
 
         public EnumEstado Estado { get; set; } = EnumEstado.Borrador;
+
+        public ICollection<Articles>? Articles { get; set; }
     }
 }

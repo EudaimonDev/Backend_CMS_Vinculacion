@@ -112,6 +112,8 @@ namespace CMSVinculacion.Application.Services
 
         public async Task<ArticleResponseDto> CreateAsync(ArticleCreateDto dto, int authorId)
         {
+            await ValidateSubCategoryAsync(dto.SubCategoryId, dto.CategoryIds);
+
             var slug = await ResolveUniqueSlugAsync(GenerateSlug(dto.Title));
 
             var article = new Articles
@@ -128,18 +130,22 @@ namespace CMSVinculacion.Application.Services
                 AuthorId = authorId,
                 StatusId = 1,
                 CreatedAt = DateTime.UtcNow,
+                SubCategoryId = dto.SubCategoryId,
                 ArticleCategories = dto.CategoryIds
                     .Select(cid => new ArticleCategory { CategoryId = cid })
                     .ToList()
             };
             var created = await _repo.CreateAsync(article);
-            return ToResponseDto(created);
+            var reloaded = await _repo.GetByIdAsync(created.ArticleId);
+            return ToResponseDto(reloaded!);
         }
 
         public async Task<ArticleResponseDto?> UpdateAsync(int id, ArticleUpdateDto dto, string updatedBy)
         {
             var article = await _repo.GetByIdAsync(id);
             if (article is null) return null;
+
+            await ValidateSubCategoryAsync(dto.SubCategoryId, dto.CategoryIds);
 
             article.Title = dto.Title;
             article.Slug = !string.IsNullOrWhiteSpace(dto.Slug)
@@ -152,6 +158,7 @@ namespace CMSVinculacion.Application.Services
             article.ContentHtml = _sanitizer.Sanitize(dto.ContentHtml);
             article.BlocksJson = dto.BlocksJson;
             article.FeaturedImage = dto.FeaturedImage;
+            article.SubCategoryId = dto.SubCategoryId;
             article.UpdatedAt = DateTime.UtcNow;
             article.UpdatedBy = updatedBy;
 
@@ -208,6 +215,22 @@ namespace CMSVinculacion.Application.Services
             return candidate;
         }
 
+        private async Task ValidateSubCategoryAsync(int? subCategoryId, IList<int> categoryIds)
+        {
+            if (!subCategoryId.HasValue)
+                return;
+
+            if (categoryIds.Count == 0)
+                throw new InvalidOperationException("Debe seleccionar una categoría para asignar una subcategoría.");
+
+            var subCategory = await _repo.GetSubCategoryByIdAsync(subCategoryId.Value);
+            if (subCategory is null)
+                throw new InvalidOperationException("La subcategoría seleccionada no existe.");
+
+            if (!categoryIds.Contains(subCategory.CategoryId))
+                throw new InvalidOperationException("La subcategoría no pertenece a la categoría seleccionada.");
+        }
+
         private static ArticleListDto ToListDto(Articles a) => new()
         {
             Id = a.ArticleId.ToString(),
@@ -219,7 +242,11 @@ namespace CMSVinculacion.Application.Services
             ReadingTime = a.ReadingTime,
             Featured = a.Featured,
             Category = a.ArticleCategories?.FirstOrDefault()?.Category?.Slug?.ToLower(),
+            CategoryIds = a.ArticleCategories?.Select(ac => ac.CategoryId).ToList() ?? new(),
             Categories = a.ArticleCategories?.Select(ac => ac.Category?.Name ?? "").ToList() ?? new(),
+            SubCategoryId = a.SubCategoryId,
+            SubCategory = a.SubCategory?.Slug?.ToLower(),
+            SubCategoryName = a.SubCategory?.Name,
             StatusName = a.Status?.StatusName,
             Date = a.PublishedAt.HasValue
                 ? a.PublishedAt.Value.ToString("d MMM yyyy", new System.Globalization.CultureInfo("es-ES"))
@@ -240,7 +267,11 @@ namespace CMSVinculacion.Application.Services
             ReadingTime = a.ReadingTime,
             Featured = a.Featured,
             Category = a.ArticleCategories?.FirstOrDefault()?.Category?.Slug?.ToLower(),
+            CategoryIds = a.ArticleCategories?.Select(ac => ac.CategoryId).ToList() ?? new(),
             Categories = a.ArticleCategories?.Select(ac => ac.Category?.Name ?? "").ToList() ?? new(),
+            SubCategoryId = a.SubCategoryId,
+            SubCategory = a.SubCategory?.Slug?.ToLower(),
+            SubCategoryName = a.SubCategory?.Name,
             StatusName = a.Status?.StatusName,
             AuthorUsername = a.Author?.Username,
             Date = a.PublishedAt.HasValue

@@ -1,11 +1,12 @@
 ﻿using CMSVinculacion.Domain.Entities.Contenido;
+using CMSVinculacion.Domain.Entities.Catalogos;
 
 namespace CMSVinculacion.Application.Interfaces
 {
     public interface IArticleRepository
     {
         Task<Articles?> GetByIdAsync(int id, bool includeDeleted = false);
-        Task<(IEnumerable<Articles> Items, int Total)> GetPublishedPagedAsync(int page, int pageSize, int? categoryId = null);
+        Task<SubCategories?> GetSubCategoryByIdAsync(int subCategoryId);        Task<(IEnumerable<Articles> Items, int Total)> GetPublishedPagedAsync(int page, int pageSize, int? categoryId = null);
         Task<IEnumerable<Articles>> GetRecentPublishedAsync(int count = 5);
         Task<IEnumerable<Articles>> GetGalleryAsync();
         Task<IEnumerable<Articles>> GetAllAdminAsync(int? statusId, int? categoryId, DateTime? startDate,int page, int pageSize);

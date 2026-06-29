@@ -29,5 +29,7 @@ namespace CMSVinculacion.Application.DTOs.articles
 
 
         public List<int> CategoryIds { get; set; } = new();
+
+        public int? SubCategoryId { get; set; }
     }
 }

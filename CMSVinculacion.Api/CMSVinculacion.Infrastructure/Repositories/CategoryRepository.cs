@@ -14,7 +14,8 @@ namespace CMSVinculacion.Infrastructure.Repositories
         public async Task<IEnumerable<Categories>> GetAllAsync(bool onlyPublic = false)
         {
             var query = _context.Categories
-                .Include(c => c.ArticleCategories)
+                .Include(c => c.ArticleCategories!)
+                    .ThenInclude(ac => ac.Article)
                 .Include(c => c.SubCategories!.Where(s => s.DeletedAt == null))
                 .Where(c => c.DeletedAt == null);
 
@@ -34,7 +35,8 @@ namespace CMSVinculacion.Infrastructure.Repositories
         public async Task<Categories?> GetByIdAsync(int id, bool includeInactive = false)
         {
             var query = _context.Categories
-                .Include(c => c.ArticleCategories)
+                .Include(c => c.ArticleCategories!)
+                    .ThenInclude(ac => ac.Article)
                 .Include(c => c.SubCategories!.Where(s => s.DeletedAt == null))
                 .Where(c => c.CategoryId == id && c.DeletedAt == null);
 
@@ -70,7 +72,11 @@ namespace CMSVinculacion.Infrastructure.Repositories
                     (!excludeId.HasValue || s.SubCategoryId != excludeId));
 
         public async Task<bool> HasArticlesAsync(int id) =>
-            await _context.ArticleCategories.AnyAsync(ac => ac.CategoryId == id);
+            await _context.ArticleCategories.AnyAsync(ac =>
+                ac.CategoryId == id &&
+                ac.Article != null &&
+                ac.Article.DeletedAt == null &&
+                ac.Article.IsActive);
 
         public async Task<Categories> CreateAsync(Categories category)
         {

@@ -1,6 +1,7 @@
 ﻿using CMSVinculacion.Domain.Entities.Seguridad;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using CMSVinculacion.Domain.Entities.Catalogos;
 
 namespace CMSVinculacion.Domain.Entities.Contenido
 {
@@ -46,6 +47,9 @@ namespace CMSVinculacion.Domain.Entities.Contenido
         public DateTime? PublishedAt { get; set; }
 
         public int ViewCount { get; set; }
+
+        public int? SubCategoryId { get; set; }
+        public SubCategories? SubCategory { get; set; }
 
         public ICollection<ArticleCategory>? ArticleCategories { get; set; }
         public ICollection<MediaFiles>? MediaFiles { get; set; }

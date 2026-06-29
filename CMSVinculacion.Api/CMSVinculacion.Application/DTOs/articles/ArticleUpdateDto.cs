@@ -28,5 +28,7 @@ namespace CMSVinculacion.Application.DTOs.articles
         public string? BlocksJson { get; set; }
 
         public List<int> CategoryIds { get; set; } = new();
+
+        public int? SubCategoryId { get; set; }
     }
 }
