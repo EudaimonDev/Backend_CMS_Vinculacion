@@ -4,7 +4,6 @@ using CMSVinculacion.Infrastructure;
 using CMSVinculacion.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -16,10 +15,13 @@ namespace CMSVinculacion.Api.Extensions
         public static IServiceCollection DependencyEF(this IServiceCollection services,
             IConfiguration configuration)
         {
-            var connectionString = configuration.GetConnectionString("defaultConnection");
+            var connectionString = configuration.GetConnectionString("DefaultConnection")
+                ?? configuration.GetConnectionString("defaultConnection")
+                ?? throw new InvalidOperationException(
+                    "No se encontró la cadena de conexión 'DefaultConnection'.");
 
             services.AddDbContext<SqlDbContext>(options =>
-                options.UseSqlServer(connectionString));
+                options.UseNpgsql(connectionString));
 
             return services;
         }

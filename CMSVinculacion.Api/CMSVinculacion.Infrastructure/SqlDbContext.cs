@@ -30,13 +30,14 @@ namespace CMSVinculacion.Infrastructure
         {
             base.OnModelCreating(modelBuilder);
 
-            // varchar por defecto
+            // Tipos de texto compatibles con PostgreSQL
             foreach (var entityType in modelBuilder.Model.GetEntityTypes())
                 foreach (var property in entityType.GetProperties())
                     if (property.ClrType == typeof(string))
                     {
                         var maxLength = property.GetMaxLength();
-                        property.SetColumnType(maxLength != null ? $"varchar({maxLength})" : "varchar(max)");
+                        property.SetColumnType(
+                            maxLength != null ? $"character varying({maxLength})" : "text");
                     }
 
             // Articles -> Author
